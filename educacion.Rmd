@@ -1,0 +1,88 @@
+---
+title: "USAID"
+author: "Alvaro Chirino, Lucila Aguilar, Sergio Garbay"
+date: "29/9/2020"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+    theme: yeti
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(knitr)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(RColorBrewer)
+#db <- read_excel("D://ARU//PPI USAID//_data//3020109.xlsx", range = "B9:AC13", col_names = FALSE)
+year <- c(2011:2019)
+datos <- c(8.2, 8.0, 8.3, 7.6, 8.2, 9.2, 9.3, 8.4, 6.7)
+#datos <- as.integer(db[3,c(2, 5, 8, 11, 14, 17, 20, 23, 26)])
+x<-data.frame(year, datos)
+```
+
+# __EDUCACIÓN__
+
+Haga click en el indicador que desea ver:
+
+[Indicador 1: Tasa de analfabetismo]
+
+[Indicador 2: ]
+
+[Indicador 3: ]
+
+[Indicador 4: ]
+
+[Indicador 5: ]
+
+
+Indicador 1: Tasa de analfabetismo
+=======================================================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+ggplot(data = x, aes(x = year, y = datos)) + geom_col(colour = "darkslateblue", fill = "darkslateblue") + 
+  scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "TASA DE ANALFABETISMO", 
+       caption = "Fuente: Instituto Nacional de Estadística (INE).") +
+  geom_text(aes(label = datos), vjust = "outward")
+#ggplotly(g1)
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ TASA DE ANALFABETISMO.
+
+__Definición:__ Porcentaje de la población mayor o igual a 15 años de edad que no puede leer, escribir, ni comprender un texto sencillo y corto sobre su vida cotidiana, en un periodo t.
+
+__Metodología de cálculo:__
+
+$$ TA(t) = \dfrac{PA(t)_{\geq 15}}{PT(t)_{\geq 15}} * 100 $$
+Donde:
+
+- $TA(t)$: Tasa de analfabetismo, en un periodo $t$.
+- $PA(t)_{\geq 15}$: Población mayor o igual a 15 años de edad que no saben leer y/o escribir en un periodo $t$.
+- $PT(t)_{\geq 15}$: Población total mayor o igual a 15 años de edad, en un periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ De cada 100 personas con una edad mayor o igual a 15 años, existe ''x'' número de personas en el mismo rango de edad que no saben leer y/o escribir.
+
+__Fuente de datos:__ Encuestas de Hogares 2011 - 2019. Instituto Nacional de Estadística (INE).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+
+# __SALUD__
+
