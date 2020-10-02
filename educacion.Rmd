@@ -15,30 +15,30 @@ library(knitr)
 library(dplyr)
 library(ggplot2)
 library(plotly)
-library(RColorBrewer)
-#db <- read_excel("D://ARU//PPI USAID//_data//3020109.xlsx", range = "B9:AC13", col_names = FALSE)
-year <- c(2011:2019)
-datos <- c(8.2, 8.0, 8.3, 7.6, 8.2, 9.2, 9.3, 8.4, 6.7)
-#datos <- as.integer(db[3,c(2, 5, 8, 11, 14, 17, 20, 23, 26)])
-x<-data.frame(year, datos)
+library(readxl)
+setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+db <- as.data.frame(read_excel("indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
+db1 <- db %>% filter(year >= 2011)
+db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
 ```
 
-# __EDUCACIÓN__
+__EDUCACIÓN__ {.sidebar}
+=====================================
 
-Haga click en el indicador que desea ver:
+__Haga click en el indicador que desea ver:__
 
-[Indicador 1: Tasa de analfabetismo]
+[__Número de estudiantes matriculados, según nivel de escolaridad__](#page-1)
 
-[Indicador 2: ]
+[__Tasa neta de matriculación, según nivel de escolaridad__](#page-2)
 
-[Indicador 3: ]
+[__Tasa de abandono escolar, según nivel de escolaridad__](#page-3)
 
-[Indicador 4: ]
+[__Gasto en educación como porcentaje del PIB__](#page-4)
 
-[Indicador 5: ]
+[__Tasa de matriculación, educación terciaria__](#page-5)
 
 
-Indicador 1: Tasa de analfabetismo
+Page 1
 =======================================================================
 
 Column {data-width=600}
@@ -47,12 +47,12 @@ Column {data-width=600}
 ### __SERIE HISTÓRICA__
 
 ```{r}
-ggplot(data = x, aes(x = year, y = datos)) + geom_col(colour = "darkslateblue", fill = "darkslateblue") + 
+g1 <- ggplot(data = db1, aes(x = year, y = matriculados, fill = primaria,  
+                             text = paste("Año: ", year, "<br>Número: ", round(matriculados,0) ))) + 
+  geom_bar(stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "TASA DE ANALFABETISMO", 
-       caption = "Fuente: Instituto Nacional de Estadística (INE).") +
-  geom_text(aes(label = datos), vjust = "outward")
-#ggplotly(g1)
+  labs(x = "Años", y = "Número de estudiantes matriculados", title = "Número de estudiantes matriculados, \n según nivel de escolaridad", fill = "Nivel")
+ggplotly(g1, tooltip = "text")
 ```
  
 Column {data-width=400}
@@ -60,22 +60,72 @@ Column {data-width=400}
 
 ### __FICHA TÉCNICA__
 
-__Nombre del indicador:__ TASA DE ANALFABETISMO.
+__Nombre del indicador:__ Número de estudiantes matriculados, según nivel de escolaridad.
 
-__Definición:__ Porcentaje de la población mayor o igual a 15 años de edad que no puede leer, escribir, ni comprender un texto sencillo y corto sobre su vida cotidiana, en un periodo t.
+__Definición:__ Población que se encuentra matriculada en establecimientos educativos de nivel primario y secundario.
 
 __Metodología de cálculo:__
 
-$$ TA(t) = \dfrac{PA(t)_{\geq 15}}{PT(t)_{\geq 15}} * 100 $$
+$$ N_{est}(t) =\sum_{i}^{N}I_i $$
+
 Donde:
 
-- $TA(t)$: Tasa de analfabetismo, en un periodo $t$.
-- $PA(t)_{\geq 15}$: Población mayor o igual a 15 años de edad que no saben leer y/o escribir en un periodo $t$.
-- $PT(t)_{\geq 15}$: Población total mayor o igual a 15 años de edad, en un periodo $t$.
+- $N_{est}(t)$: Número de estudiantes matriculados en el periodo escolar $t$.
+
+- $I_i$: Toma el valor $1$ si la persona $i$ se matriculó en algún establecimiento educativo.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ "x" estudiantes que se inscribieron o matricularon en establecimiento educativos de nivel primario o secundario.
+
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+
+Page 2
+=======================================================================
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g2 <- ggplot(data = db1, aes(x = year, y = net_mat, group = primaria, 
+                             color = primaria, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(net_mat,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Tasa neta de matriculación, \n según nivel de escolaridad", caption = "Fuente: INE.", color = "Nivel")
+ggplotly(g2, tooltip = "text")
+```
+ 
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa neta de matriculación, según nivel de escolaridad.
+
+__Definición:__ Número de estudiantes que están matriculados en un determinado nivel de escolaridad en un establecimiento educativo, y además pertenecen al grupo de edad que corresponde a ese nivel de educación como porcentaje del total de la población del grupo de edad respectivo.
+
+__Metodología de cálculo:__
+
+$$ TMN(t) = \dfrac{M_h(t)}{PT_h(t)} *100 $$
+
+Donde:
+
+- $TMN(t)$: Tasa de matriculación neta para el periodo $t$.
+
+- $M_h(t)$: Personas del grupo de edad $h$ y se encuentran matriculadas en el nivel educativo correspondiente en el tiempo $t$.
+
+- $PT_h(t)$: Total de personas del grupo de edad $h$ en el tiempo $t$.
 
 __Unidad de medida:__ Porcentaje.
 
-__Interpretación:__ De cada 100 personas con una edad mayor o igual a 15 años, existe ''x'' número de personas en el mismo rango de edad que no saben leer y/o escribir.
+__Interpretación:__ De cada 100 estudiantes, "x" se encuentran matriculados efectivamente en un determinado nivel de escolaridad.
 
 __Fuente de datos:__ Encuestas de Hogares 2011 - 2019. Instituto Nacional de Estadística (INE).
 
@@ -83,6 +133,148 @@ __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
+Page 3
+=======================================================================
 
-# __SALUD__
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g3 <- ggplot(data = db1, aes(x = year, y = abandono, group = primaria, 
+                             color = primaria,  
+                             text = paste("Año: ", year, "<br>Tasa: ", round(abandono,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Tasa de abandono escolar, \n según nivel de escolaridad", color = "Nivel", caption = "Fuente: SEIE")
+ggplotly(g3, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa de abandono escolar, según nivel de escolaridad.
+
+__Definición:__ Número de estudiantes contabilizados al final de un periodo escolar que abandonan un determinado grado o curso de estudios, expresado como porcentaje del total de estudiantes matriculados al final del mismo grado o curso de estudios y periodo escolar.
+
+__Metodología de cálculo:__
+
+$$ TAE(t) = \dfrac{Ab_h(t)}{M_h(t)}$$
+
+Donde:
+
+- $TAE(t)$: Tasa de abandono escolar en el periodo escolar $t$.
+
+- $Ab_h(t)$: Número de estudiantes que abandonan el nivel $h$ en el periodo escolar $t$
+
+- $M_h(t$: Total de estudiantes matriculados en el nivel $h$ en el periodo escolar $t$. 
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ De cada 100 estudiantes matriculados, existen "x" que abandonaron el curso del nivel correspondiente antes de finalizar sus estudios en un periodo escolar esppecífico $t$.
+
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+Page 4
+=======================================================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g4 <- ggplot(data = db2, aes(x = year, y = gasto_edu_pib, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(gasto_edu_pib,2) ))) + 
+  geom_line(aes(group = 1), colour = "black") + geom_point() +
+  scale_x_discrete(limits = c(2006:2017)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Gasto en educación, \n como porcentaje del PIB", caption = "Fuente: SEIE.")
+ggplotly(g4, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Gasto público en educación, total (% del PIB).
+
+__Definición:__ El gasto público en educación como porcentaje del PIB comprende el gasto público total (corriente y de capital) dedicado a la educación a cargo de la administración local, regional y nacional, municipalidades expresado como porcentaje del Producto Interno Bruto (PIB) en un año determinado. 
+
+__Metodología de cálculo:__ 
+
+$$ GE_{PIB}(t)= \dfrac{GTE(t)}{PIB(t)}*100$$
+
+Donde:
+
+- $GE_{PIB}(t)$: Gasto en educación como porcentaje del PIB en un determinado tiempo $t$.
+
+- $GTE(t)$: Gasto total en educación en un determinado tiempo $t$.
+
+- $PIB(t)$: Producto interno bruto en un determinado tiempo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ "x" porcentaje del PIB gasta el gobierno en educación.
+
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+
+Page 5
+=======================================================================
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+db1 <- db %>% filter(label_terc == "Tasa Neta" & year >= 2011 & year <= 2019)
+g5 <- ggplot(data = db1, aes(x = year, y = edu_terc, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(edu_terc, 2) ))) + geom_line(aes(group = 1), colour = "black") + geom_point()+
+  scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Tasa de matriculación, educación terciaria", caption = "Fuente: INE")
+ggplotly(g5, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa de matriculación, educación terciaria.
+
+__Definición:__ Población que está matriculada en establecimientos de enseñanza superior universitaria respecto del total de la población.
+
+__Metodología de cálculo:__
+
+$$ TMNET(t) = \dfrac{M_{ET}(t)}{PT_{ET}(t)} *100 $$
+
+Donde:
+
+- $TMNET(t)$: Tasa de matriculación neta en educación terciaria para el periodo $t$.
+
+- $M_{ET}(t)$: Personas se encuentran matriculadas en establecimientos de enseñanza superior universitaria en el tiempo $t$.
+
+- $PT_{ET}(t)$: Población total cinco años después de finalizar la enseñanza secundaria en el tiempo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ De cada 100 personas que oficialmente tienen vencido el nivel secundario completo, "x" se encuentran matriculadas en establecimientos de educación superior universitaria.
+
+__Fuente de datos:__ Encuestas de Hogares 2011 - 2019. Instituto Nacional de Estadística (INE).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
 
