@@ -1,0 +1,276 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    social: [ "twitter", "facebook", "menu" ]
+    theme: readable
+    logo: logo2.png
+runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(scales)
+# Base de datos
+setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+db <- as.data.frame(read_excel("data_economics.xlsx", range = "A1:H11", col_names = T), stringsAsFactor = T)
+
+```
+
+#### __INDICADORES VINCULADOS A PROGRAMAS ELECTORALES__
+
+##### Acerca de
+
+Iniciativa de Fundación Aru
+
+##### Financiamiento
+
+Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
+
+# Crecimiento económico {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = pib, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(pib,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Crecimiento económico", caption = "Fuente: INE.")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa de crecimiento del Producto Interno Bruto (PIB).
+
+__Definición:__ Es la variación que experimenta el PIB en un periodo de tiempo determinado. Si la tasa de variación del PIB es positiva significa que la economía del país está creciendo.
+
+__Metodología de cálculo:__
+
+$$ g_t =  (\dfrac{\sum P_0Q_t}{\sum P_0Q_{t-1}}-1) *100 = (\dfrac{PIB_t}{PIB_{t-1}}-1)*100 $$
+
+Donde:
+
+- $g_t$: Tasa de crecimiento del PIB en el periodo $t$.
+
+- $P_0$: Precios del año base $0$.
+
+- $Q_t$ y $Q_{t-1}$: Cantidades producidas en los periodos $t$ y $t-1$, respectivamente.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ La variación del PIB real respecto al periodo anterior $(t-1)$ es del "x"%.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Fondo Monetario Internacional (FMI).
+
+# Saldo Comercial {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g2 <- ggplot(data = db, aes(x = year, y = comercial/1000,  
+                             text = paste("Año: ", year, "<br>Saldo: $ ", round(comercial/1000,1) ))) + 
+  geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_y_continuous(labels=dollar_format(prefix="$")) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de dólares estadounidenses", title = "Evolucion del saldo comercial")
+ggplotly(g2, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Saldo comercial.
+
+__Definición:__ Diferencia entre los valores de exportación y de importación.
+
+__Metodología de cálculo:__
+
+$$ SC_t = X_t - M_t $$
+
+Donde:
+
+- $SC_t$: Saldo comercial en el periodo $t$.
+
+- $X_i$: Valor total de las exportaciones en el periodo $t$.
+
+- $M_i$: Valor total de las importaciones en el periodo $t$.
+
+__Unidad de medida:__ Millones de dólares estadounidenses.
+
+__Interpretación:__ El saldo en balanza comercial es de "x" millones de dólares estadounidenses que representa un déficit(-)/superávit(+) en el periodo $t$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Inversión Pública {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+    
+### __SERIE HISTÓRICA__
+
+```{r}
+g3 <- ggplot(data = na.omit(db), aes(x = year, y = inversion/1000,  
+                             text = paste("Año: ", year, "<br>Valor: $ ", round(inversion/1000,1) ))) + 
+  geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_y_continuous(labels=dollar_format(prefix="$")) +
+  scale_x_discrete(limits = c(2010:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de dólares", title = "Evolucion de la inversión pública")
+ggplotly(g3, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Inversión pública ejecutada.
+
+__Definición:__ Gasto de origen público destinado a incrementar, mejorar o reponer las existencias de capital físico de dominio público y/o de capital humano, con el objeto de ampliar la capacidad del país para la prestación de servicios o producción de bienes. Incluye todas las actividades de preinversión e inversión ejecutadas que realizan las entidades del sector público.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de dólares.
+
+__Interpretación:__ El gasto en inversión pública fue de "x" millones de dólares estadounidenses en el periodo $t$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis de Políticas Económicas y Sociales (UDAPE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística.
+
+# Déficit/superávit fiscal {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = fiscal, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(fiscal,2), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Evolución del déficit/superávit fiscal, \n como % del PIB", caption = "Fuente: INE.")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Déficit/superávit fiscal como porcentaje del PIB.
+
+__Definición:__ Resultado negativo/positivo de las cuentas del estado, ocurre cuando el gasto del sistema público no financiero es mayor/menor al conjunto de los recursos, respecto al PIB.
+
+__Metodología de cálculo:__
+
+$$ DF_t = \dfrac{SPNF_t}{PIB_t} *100 $$
+Donde:
+
+- $GSPNF_t$: Saldo total de obligaciones contractuales directas a plazo fijo del Sistema Público No Financiero a otros pendientes en un periodo $t$.
+
+- $PIB_t$: Producto interno bruto en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ El déficit/superávit fiscal representa un "x"% del PIB en el periodo $t$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Central de Bolivia (BCB) e Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Banco Mundial(BM) e Instituto Nacional de Estadística (INE).
+
+# índice de precios al consumidor {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = ipc, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(ipc,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Variación porcentual acumulada del índice de precios al consumidor", caption = "Fuente: INE.")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Variación porcentual acumulada del índice de precios al consumidor.
+
+__Definición:__ Es la variación promedio de los precios en el año y se calcula como cociente entre el índice en el mes $t$ y el índice de diciembre del año anterior.
+
+__Metodología de cálculo:__
+
+$$ VPA_t = (\dfrac{IPC_t}{IPC_{Dec\,prev\,year}}-1)*100 $$
+Donde:
+
+- $VPA_t$: Variación porcentual acumulada en el año $t$.
+
+- $IPC_t$: Índice de precios al consumidor en el año $t$.
+
+- $IPC_{Dec\,prev\,year}$: Índice de precios al consumidor en diciembre del año $t-1$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ A diciembre del periodo $t$ el índice de precios al consumidor registró una variación acumulada de "x" puntos porcentuales respecto a diciembre del periodo $t-1$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).

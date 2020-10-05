@@ -1,0 +1,291 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    social: [ "twitter", "facebook", "menu" ]
+    theme: readable
+    logo: logo2.png
+runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(wordcloud)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+#base de datos
+setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+db <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C31", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), stringsAsFactor = T)
+db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), stringsAsFactor = T)
+```
+
+
+###
+
+#### __INDICADORES VINCULADOS A PROGRAMAS ELECTORALES__
+
+##### Acerca de
+
+Iniciativa de Fundación Aru
+
+##### Financiamiento
+
+Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
+
+# Establecimientos de salud {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = construccion, fill = level,  
+                             text = paste("Año: ", year, "<br>Número: ", round(construccion,0) ))) + 
+  geom_bar(stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de establecimientos de salud", title = "Número de establecimientos de salud, \n según nivel", fill = "Nivel")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Establecimientos de salud.
+
+__Definición:__ Número de establecimientos de salud disponibles.
+
+__Metodología de cálculo:__
+
+$$ NES_{t} =\sum_{i}^{N}ES_{it} $$
+
+Donde:
+
+- $NES_{t}$: Número de establecimientos de salud en un periodo $t$.
+
+- $ES_{it}$: Número de establecimientos de salud en un departamento $i$ para un periodo $t$.
+
+- $N$: 9 departamentos.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En el año $t$ existen "x", "y" o "z" establecimientos de salud de primer, segundo o tercer nivel, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Servicio Nacional de Información en Salud (SNIS).
+
+# Cobertura seguro de salud {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+```{r}
+g2 <- ggplot(data = db1, aes(x = year, y = seguro,  
+                             text = paste("Año: ", year, "<br>Valor: ", round(seguro,2) ))) + 
+  geom_bar(stat = "identity", colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Porcentaje de personas que cuentan \n con seguro de salud")
+ggplotly(g2, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Cobertura de seguro de salud.
+
+__Definición:__ Es el porcentaje de personas que declara tener un seguro de salud pudiendo ser este público o privado o de otra índole.
+
+__Metodología de cálculo:__
+
+$$ CS_t =\dfrac{NPCS_t}{NP_t}*100 $$
+
+Donde:
+
+- $CS_t$: Cobertura de salud en un periodo $t$.
+
+- $NPCS_t$: Número personas que cuentan con un seguro de salud en un periodo $t$.
+
+- $NP_t$: Número total de personas en un periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ El "x"% de la población cuenta con seguro de salud durante el periodo $t$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de información proveniente de las Encuestas de Hogares de los años de referencia.
+
+# Mortalidad infantil {data-navmenu="Salud" data-icon="fa-list"}
+   
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__    
+
+```{r}
+g3 <- ggplot(data = db1, aes(x = year, y = mort_inf, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(mort_inf,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Tasa de mortalidad, menores de 5 años (por cada 1.000)", caption = "Fuente: BM.")
+ggplotly(g3, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa de mortalidad en niños menores de 5 años de edad.
+
+__Definición:__ La probabilidad de que un niño nacido en un año o período específico muera antes de alcanzar la edad de 5 años, si está sujeto a las tasas de mortalidad específicas por edad de ese período, expresada por 1000 nacidos vivos.
+
+__Metodología de cálculo:__
+
+$$ TM_t = \dfrac{DN_{<5}}{NAV_{<5}}*1000 $$
+
+Donde:
+
+- $TM_t$: Tasa de mortalidad en niños menores de 5 años por cada 1000 nacidos vivos en un periodo $t$.
+
+- $DN_{<5}$: Número de defunciones de niños menores de 5 años en un periodo $t$.
+
+- $NAV_{<5}$: Número de nacidos vivos en un periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En el año $t$ por cada 1000 nacidos vivos se estiman "x" defunciones de niños menores de 5 años.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Organización Mundial de la Salud (OMS).
+
+# Prevalencia de anemia {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__    
+
+```{r}
+g4 <- ggplot(data = db2, aes(x = year, y = prev_anemia, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(prev_anemia,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(1989, 1994, 1998, 2003, 2008, 2012, 2016)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Prevalencia de anemia en la infancia (% de menores de 5 años)", caption = "Fuente: BM.")
+ggplotly(g4, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Prevalencia de anemia en niños menores de 5 años de edad.
+
+__Definición:__ EL porcentaje de niños menores de 5 años cuyo nivel de hemoglobina es inferior a 110 gramos por litro al nivel del mar.
+
+__Metodología de cálculo:__
+
+$$ PA_t = \dfrac{NA_{<5}}{TN_{<5}}*100 $$
+
+Donde:
+
+- $PA_t$: Prevalencia de anemia para niños menores de 5 años de edad en un periodo determinado $t$.
+
+- $NA_{<5}$: Número de niños menores de 5 años de edad que tienen anemia (nivel de hemoglobina inferior a 110 gramos por litro a nivel del mar) en un periodo determinado $t$.
+
+- $TN_{<5}$: Total de la población de niños menores de 5 años de edad en un periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ El "x"% de niños menores de 5 años se estiman tiene un nivel de hemoglobina inferior a 110 gramos por litro a nivel del mar (anemia).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Embarazo adolescente {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__    
+
+```{r}
+db2$year <- as.character(db2$year)
+g5 <- ggplot(data = db2, aes(x = year, y = m_adolescent,  
+                             text = paste("Año: ", year, "<br>Valor: ", round(m_adolescent,2) ))) + 
+  geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_x_discrete(limits = c("1989", "1994", "1998", "2003", "2008", "2016")) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", title = "Madres adolescentes (% de mujeres entre 15 y 19 años que \n tuvieron hijos o se encuentran embarazadas)", caption = "Fuente: BM.")
+
+ggplotly(g5, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Porcentaje de madres adolescentes.
+
+__Definición:__ Las madres adolescentes son el porcentaje de mujeres de 15 a 19 años que ya tienen hijos o están embarazadas actualmente.
+
+__Metodología de cálculo:__
+
+$$ MA_t = \dfrac{MA(15\,to\,19\,y)_t}{TM(15\,to\,19\,y)_t}*100 $$
+
+Donde:
+
+- $MA_t$: Porcentaje de madres adolescentes en el periodo t $t$.
+
+- $MA(15\,to\,19\,y)_t$: Número de mujeres adolescentes (15 a 19 años de edad) que ya tienen hijos o se encuentras embarazadas en un periodo $t$.
+
+- $TM(15\,to\,19\,y)_t$: Número de total de mujeres adolescentes (15 a 19 años de edad) en un periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ El $x\%$ de las mujeres entre 15 a 19 años de edad se ecnuentran embarazadas o ya son madres en el año $t$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM) e Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).

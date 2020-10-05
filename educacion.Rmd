@@ -1,45 +1,58 @@
 ---
-title: "USAID"
-author: "Alvaro Chirino, Lucila Aguilar, Sergio Garbay"
-date: "29/9/2020"
+title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    orientation: columns
-    vertical_layout: scroll
-    theme: yeti
+    social: [ "twitter", "facebook", "menu" ]
+    theme: readable
+    logo: logo2.png
+runtime: shiny  
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-library(flexdashboard)
-library(knitr)
-library(dplyr)
-library(ggplot2)
-library(plotly)
-library(readxl)
-setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-db <- as.data.frame(read_excel("indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
-db1 <- db %>% filter(year >= 2011)
-db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
+```{r}
+
 ```
 
-__EDUCACIÓN__ {.sidebar}
-=====================================
 
-__Haga click en el indicador que desea ver:__
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+#base de datos
+setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+db <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F41", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+db1 <- db %>% filter(year >= 2011)
+db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+```
 
-[__Número de estudiantes matriculados, según nivel de escolaridad__](#page-1)
 
-[__Tasa neta de matriculación, según nivel de escolaridad__](#page-2)
+###
 
-[__Tasa de abandono escolar, según nivel de escolaridad__](#page-3)
-
-[__Gasto en educación como porcentaje del PIB__](#page-4)
-
-[__Tasa de matriculación, educación terciaria__](#page-5)
+#### Organizaciones Políticas
 
 
-Page 1
-=======================================================================
+
+##### Acerca de
+
+Iniciativa de Fundación Aru
+
+##### Financiamiento
+
+Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
+
+# Número de estudiantes matriculados {data-navmenu="Educación" data-icon="fa-list"}
 
 Column {data-width=600}
 -----------------------------------------------------------------------
@@ -64,29 +77,19 @@ __Nombre del indicador:__ Número de estudiantes matriculados, según nivel de e
 
 __Definición:__ Población que se encuentra matriculada en establecimientos educativos de nivel primario y secundario.
 
-__Metodología de cálculo:__
-
-$$ N_{est}(t) =\sum_{i}^{N}I_i $$
-
-Donde:
-
-- $N_{est}(t)$: Número de estudiantes matriculados en el periodo escolar $t$.
-
-- $I_i$: Toma el valor $1$ si la persona $i$ se matriculó en algún establecimiento educativo.
+__Metodología de cálculo:__ No aplica.
 
 __Unidad de medida:__ Número absoluto.
 
 __Interpretación:__ "x" estudiantes que se inscribieron o matricularon en establecimiento educativos de nivel primario o secundario.
 
-__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
-
 __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
 
-Page 2
-=======================================================================
+# Tasa neta de matriculación {data-navmenu="Educación" data-icon="fa-list"}
 
 Column {data-width=650}
 -----------------------------------------------------------------------
@@ -109,33 +112,35 @@ Column {data-width=350}
 
 __Nombre del indicador:__ Tasa neta de matriculación, según nivel de escolaridad.
 
-__Definición:__ Número de estudiantes que están matriculados en un determinado nivel de escolaridad en un establecimiento educativo, y además pertenecen al grupo de edad que corresponde a ese nivel de educación como porcentaje del total de la población del grupo de edad respectivo.
+__Definición:__ Número de alumnos del grupo de edad correspondiente teóricamente a un nivel de educación dado, expresado en porcentaje de la población total de ese grupo de edad.
 
 __Metodología de cálculo:__
 
-$$ TMN(t) = \dfrac{M_h(t)}{PT_h(t)} *100 $$
+$$ TMN_h^t = \dfrac{M_{ha}^t}{PT_{ha}^t} *100 $$
 
 Donde:
 
-- $TMN(t)$: Tasa de matriculación neta para el periodo $t$.
+- $TMN_h^t$: Tasa de matriculación neta al nivel educativo $h$ para el periodo $t$.
 
-- $M_h(t)$: Personas del grupo de edad $h$ y se encuentran matriculadas en el nivel educativo correspondiente en el tiempo $t$.
+- $M_{ha}^t$: Matrícula de la población del grupo de edad $a$ en el nivel de enseñanza $h$ en el año escolar $t$.
 
-- $PT_h(t)$: Total de personas del grupo de edad $h$ en el tiempo $t$.
+- $PT_{ha}^t$: Población del grupo de edad a que corresponde oficialmente al nivel de enseñanza $h$ en el año escolar $t$.
 
 __Unidad de medida:__ Porcentaje.
 
-__Interpretación:__ De cada 100 estudiantes, "x" se encuentran matriculados efectivamente en un determinado nivel de escolaridad.
-
-__Fuente de datos:__ Encuestas de Hogares 2011 - 2019. Instituto Nacional de Estadística (INE).
+__Interpretación:__ De cada 100 personas del grupo de edad $a$ que oficialmente pertenecen al nivel educativo $h$,"x" están matriculadas en el
+nivel educativo $h$ en la edad reglamentaria en el período $t$.
 
 __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
-Page 3
-=======================================================================
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de información proveniente de las Encuestas de Hogares de los años de referencia.
 
+__Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO).
+
+# Tasa de abandono escolar {data-navmenu="Educación" data-icon="fa-list"}
+    
 Column {data-width=600}
 -----------------------------------------------------------------------
 
@@ -157,32 +162,33 @@ Column {data-width=400}
 
 __Nombre del indicador:__ Tasa de abandono escolar, según nivel de escolaridad.
 
-__Definición:__ Número de estudiantes contabilizados al final de un periodo escolar que abandonan un determinado grado o curso de estudios, expresado como porcentaje del total de estudiantes matriculados al final del mismo grado o curso de estudios y periodo escolar.
+__Definición:__ Porcentaje de alumnos o estudiantes que abandonan un grado dado durante un año escolar dado. Es la diferencia entre 100% y la suma de las tasas de promoción y repetición.
 
 __Metodología de cálculo:__
 
-$$ TAE(t) = \dfrac{Ab_h(t)}{M_h(t)}$$
-
+$$ TAE_i^t = 100 - TP_i^t - TR_i^t$$
 Donde:
 
-- $TAE(t)$: Tasa de abandono escolar en el periodo escolar $t$.
+- $TAE_i^t$: Tasa de abandono escolar para el grado $i$ en el año escolar $t$.
 
-- $Ab_h(t)$: Número de estudiantes que abandonan el nivel $h$ en el periodo escolar $t$
+- $TP_i^t$: Tasa de promoción para el grado $i$ en el año escolar $t$.
 
-- $M_h(t$: Total de estudiantes matriculados en el nivel $h$ en el periodo escolar $t$. 
+- $TR_i^t$: Tasa de repetición para el grado $i$ en el año escolar $t$. 
 
 __Unidad de medida:__ Porcentaje.
 
-__Interpretación:__ De cada 100 estudiantes matriculados, existen "x" que abandonaron el curso del nivel correspondiente antes de finalizar sus estudios en un periodo escolar esppecífico $t$.
-
-__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+__Interpretación:__ Existen un "x"% de estudiantes que abandonaron un determinado grado $i$ en el año escolar $t$.
 
 __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
-Page 4
-=======================================================================
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+
+__Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO).
+
+# Gasto en educación, como % del PIB {data-navmenu="Educación" data-icon="fa-list"}
+
 
 Column {data-width=600}
 -----------------------------------------------------------------------
@@ -190,10 +196,10 @@ Column {data-width=600}
 ### __SERIE HISTÓRICA__
 
 ```{r}
-g4 <- ggplot(data = db2, aes(x = year, y = gasto_edu_pib, 
+g4 <- ggplot(data = na.omit(db2), aes(x = year, y = gasto_edu_pib, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(gasto_edu_pib,2) ))) + 
-  geom_line(aes(group = 1), colour = "black") + geom_point() +
-  scale_x_discrete(limits = c(2006:2017)) +  theme_gray() + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2006:2018)) +  theme_gray() + 
   labs(x = "Años", y = "En porcentaje", title = "Gasto en educación, \n como porcentaje del PIB", caption = "Fuente: SEIE.")
 ggplotly(g4, tooltip = "text")
 ```
@@ -203,35 +209,35 @@ Column {data-width=400}
 
 ### __FICHA TÉCNICA__
 
-__Nombre del indicador:__ Gasto público en educación, total (% del PIB).
+__Nombre del indicador:__ Gasto público en educación en porcentaje del PIB.
 
-__Definición:__ El gasto público en educación como porcentaje del PIB comprende el gasto público total (corriente y de capital) dedicado a la educación a cargo de la administración local, regional y nacional, municipalidades expresado como porcentaje del Producto Interno Bruto (PIB) en un año determinado. 
+__Definición:__ Gasto corriente y en capital dedicado a la educación a cargo de la administración local, regional y nacional, municipalidades inclusive (se excluyen las contribuciones de los hogares), expresado en porcentaje del PIB.
 
 __Metodología de cálculo:__ 
 
-$$ GE_{PIB}(t)= \dfrac{GTE(t)}{PIB(t)}*100$$
+$$ PGE_t^{PIB}= \dfrac{GTE_t}{PIB_t}*100$$
 
 Donde:
 
-- $GE_{PIB}(t)$: Gasto en educación como porcentaje del PIB en un determinado tiempo $t$.
+- $PGE_t^{PIB}$: Porcentaje del gasto público destinado a la educación en el año fiscal $t$.
 
-- $GTE(t)$: Gasto total en educación en un determinado tiempo $t$.
+- $GTE(t)$: Gasto público total destinado a la educación en el año fiscal $t$.
 
-- $PIB(t)$: Producto interno bruto en un determinado tiempo $t$.
+- $PIB(t)$: Producto interno bruto en el año fiscal $t$.
 
 __Unidad de medida:__ Porcentaje.
 
-__Interpretación:__ "x" porcentaje del PIB gasta el gobierno en educación.
-
-__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
+__Interpretación:__ El porcentaje del PIB destinado a gasto público en educación es de "x"%.
 
 __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
+__Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE) e Instituto Nacional de Estadística (INE).
 
-Page 5
-=======================================================================
+__Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO).
+
+# Tasa de matriculación educación terciaria {data-navmenu="Educación" data-icon="fa-list"}
 
 Column {data-width=600}
 -----------------------------------------------------------------------
@@ -239,11 +245,10 @@ Column {data-width=600}
 ### __SERIE HISTÓRICA__
 
 ```{r}
-db1 <- db %>% filter(label_terc == "Tasa Neta" & year >= 2011 & year <= 2019)
-g5 <- ggplot(data = db1, aes(x = year, y = edu_terc, 
-                             text = paste("Año: ", year, "<br>Tasa: ", round(edu_terc, 2) ))) + geom_line(aes(group = 1), colour = "black") + geom_point()+
+g5 <- ggplot(data = na.omit(db2), aes(x = year, y = educ_terc_raw, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(educ_terc_raw, 2) ))) + geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3)+
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Tasa de matriculación, educación terciaria", caption = "Fuente: INE")
+  labs(x = "Años", y = "En porcentaje", title = "Tasa de matriculación bruta, educación terciaria", caption = "Fuente: INE")
 ggplotly(g5, tooltip = "text")
 ```
  
@@ -252,9 +257,9 @@ Column {data-width=400}
 
 ### __FICHA TÉCNICA__
 
-__Nombre del indicador:__ Tasa de matriculación, educación terciaria.
+__Nombre del indicador:__ Tasa de matriculación bruta en educación terciaria.
 
-__Definición:__ Población que está matriculada en establecimientos de enseñanza superior universitaria respecto del total de la población.
+__Definición:__ Corresponde al número total de estudiantes matriculados en educación superior (niveles 5 y 6 de la CINE), independientemente de su edad, expresado como porcentaje de la población total del grupo etario cinco años después de finalizar la enseñanza secundaria.
 
 __Metodología de cálculo:__
 
@@ -262,19 +267,20 @@ $$ TMNET(t) = \dfrac{M_{ET}(t)}{PT_{ET}(t)} *100 $$
 
 Donde:
 
-- $TMNET(t)$: Tasa de matriculación neta en educación terciaria para el periodo $t$.
+- $TMNET(t)$: Tasa de matriculación bruta en educación terciaria para el periodo $t$.
 
-- $M_{ET}(t)$: Personas se encuentran matriculadas en establecimientos de enseñanza superior universitaria en el tiempo $t$.
+- $M_{ET}(t)$: Número de estudiantes matriculados en establecimientos de enseñanza superior, independientemente de su edad, en el tiempo $t$.
 
-- $PT_{ET}(t)$: Población total cinco años después de finalizar la enseñanza secundaria en el tiempo $t$.
+- $PT_{ET}(t)$: población total del grupo etario cinco años después de finalizar la enseñanza secundaria, en el periodo $t$.
 
 __Unidad de medida:__ Porcentaje.
 
-__Interpretación:__ De cada 100 personas que oficialmente tienen vencido el nivel secundario completo, "x" se encuentran matriculadas en establecimientos de educación superior universitaria.
-
-__Fuente de datos:__ Encuestas de Hogares 2011 - 2019. Instituto Nacional de Estadística (INE).
+__Interpretación:__ De cada 100 personas que oficialmente pertenecen a un nivel educativo superior (implica tener vencida la secundaria completa), "x" se encuentran matriculadas en establecimientos de educación superior, independientemente de la edad reglamentaria en el período $t$.
 
 __Nivel de desagregación:__ Nacional.
 
 __Periodicidad:__ Anual.
 
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de información proveniente de las Encuestas de Hogares de los años de referencia.
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
