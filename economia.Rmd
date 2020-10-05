@@ -12,23 +12,24 @@ editor_options:
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
-library(tm)
+#library(tm)
 library(dplyr)
 library(ggplot2)
-library(httr)
-library(plotrix)
-library(shiny)
-library(shinyWidgets)
-library(gridExtra)
+#library(httr)
+#library(plotrix)
+#library(shiny)
+#library(shinyWidgets)
+#library(gridExtra)
 library(ggthemes)
-library(tidytext)
+#library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
 library(scales)
 # Base de datos
-setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-db <- as.data.frame(read_excel("data_economics.xlsx", range = "A1:H11", col_names = T), stringsAsFactor = T)
+#db<-load(url("https://github.com/LucilaAguilar/ppi_usaid/tree/main/_data/data_economics.xlsx"))
+#setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+db <- as.data.frame(read_excel(load(url("https://github.com/LucilaAguilar/ppi_usaid/tree/main/_data/data_economics.xlsx")), range = "A1:H11", col_names = T), stringsAsFactor = T)
 
 ```
 
