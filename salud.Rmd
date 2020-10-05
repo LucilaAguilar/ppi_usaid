@@ -5,14 +5,12 @@ output:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
     logo: logo2.png
-runtime: shiny
 editor_options: 
   chunk_output_type: console
 ---
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
-library(wordcloud)
 library(tm)
 library(dplyr)
 library(ggplot2)
@@ -28,10 +26,11 @@ library(plotly)
 library(flexdashboard)
 library(knitr)
 #base de datos
-setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-db <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C31", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
-db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), stringsAsFactor = T)
-db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), stringsAsFactor = T)
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/salud.RData"))
+#setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+#db <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C31", sheet = "Hoja1", col_names = T), #stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), #stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), #stringsAsFactor = T)
 ```
 
 

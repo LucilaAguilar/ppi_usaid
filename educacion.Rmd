@@ -5,7 +5,6 @@ output:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
     logo: logo2.png
-runtime: shiny  
 editor_options: 
   chunk_output_type: console
 ---
@@ -31,10 +30,11 @@ library(plotly)
 library(flexdashboard)
 library(knitr)
 #base de datos
-setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-db <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F41", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/educacion.RData"))
+#setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
+#db <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F41", sheet = "Hoja1", col_names = #T), stringsAsFactor = T)
 db1 <- db %>% filter(year >= 2011)
-db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = #T), stringsAsFactor = T)
 ```
 
 
