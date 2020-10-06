@@ -2,7 +2,11 @@
 title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "twitter", "facebook", "menu" ]
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
     theme: readable
     logo: logo_proy4.png
 #runtime: shiny
@@ -50,13 +54,15 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Porcentaje de ocupados que trabajan en el sector informal de la economía__
+
 ```{r}
 db2$year <- as.character(db2$year)
 g1 <- ggplot(data = db2, aes(x = year, y = informalidad, 
                              text = paste("Año: ", year, "<br>Porcentaje: ", round(informalidad,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019" )) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de ocupados", title = "Porcentaje de ocupados que trabajan en el sector informal de la economía", caption = "Fuente: INE.")
+  labs(x = "Años", y = "Porcentaje de ocupados", caption = "Fuente: INE.")
 ggplotly(g1, tooltip = "text")
 ```
  
@@ -100,13 +106,15 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Porcentaje de la población económicamente activa que se encuentran desocupados__
+
 ```{r}
 db2$year <- as.character(db2$year)
 g2 <- ggplot(data = db2, aes(x = year, y = desempleo, 
                              text = paste("Año: ", year, "<br>Porcentaje: ", round(desempleo,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019" )) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la población económicamente activa", title = "Porcentaje de la población económicamente activa que se encuentran desocupados", caption = "Fuente: INE.")
+  labs(x = "Años", y = "Porcentaje de la población económicamente activa", caption = "Fuente: INE.")
 ggplotly(g2, tooltip = "text")
 ```
  
@@ -151,6 +159,8 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Tasa de ocupación según género__
+
 ```{r}
 db3 <- melt(db1, id="year")
 db3$variable <- ifelse(db3$variable=="ocupacion_mujeres", "Mujeres", "Hombres")
@@ -159,7 +169,7 @@ g3 <- ggplot(data = db3, aes(x = year, y = value, group = variable,
                              color = variable, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la población económicamente activa", title = "Tasa de ocupación según género", caption = "Fuente: INE.", color = "Género")
+  labs(x = "Años", y = "Porcentaje de la población económicamente activa", caption = "Fuente: INE.", color = "Género")
 ggplotly(g3, tooltip = "text")
 ```
  
@@ -205,6 +215,8 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Descompsición de la población ocupada según actividad económica__
+
 ```{r}
 db5 <- melt(db4, id="year")
 db5$variable <- ifelse(db5$variable=="sector_a", "Agricultura", ifelse(db5$variable=="sector_b", "Industria", "Servicios"))
@@ -213,7 +225,7 @@ g4 <- ggplot(data = db5, aes(x = year, y = value, group = variable,
                              color = variable, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la población ocupada", title = "Descompsición de la población ocupada según actividad económica", caption = "Fuente: INE.", color = "Sector")
+  labs(x = "Años", y = "Porcentaje de la población ocupada", caption = "Fuente: INE.", color = "Sector")
 ggplotly(g4, tooltip = "text")
 ```
  
@@ -265,12 +277,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Producto por trabajador (PIB en $us a precios constantes 2010)__
+
 ```{r}
 g5 <- ggplot(data = db, aes(x = year, y = productividad, 
                              text = paste("Año: ", year, "<br>Producto: ", round(productividad,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Producto por trabajador", title = "Producto por trabajador (PIB en $us a precios constantes 2010)", caption = "Fuente: ILOSTAT.")
+  labs(x = "Años", y = "Producto por trabajador", caption = "Fuente: ILOSTAT.")
 ggplotly(g5, tooltip = "text")
 
 ```

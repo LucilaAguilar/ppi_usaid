@@ -2,7 +2,11 @@
 title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "twitter", "facebook", "menu" ]
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
     theme: readable
     logo: logo_proy4.png
 #runtime: shiny
@@ -50,13 +54,15 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Hogares con un adecuado manejo de disposición de residuos sólidos__
+
 ```{r}
 db1$year <- as.character(db1$year)
 g1 <- ggplot(data = db1, aes(x = year, y = basura, 
                              text = paste("Año: ", year, "<br>Porcentaje: ", round(basura,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c("2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de hogares", title = "Hogares con un adecuado manejo de disposición de residuos sólidos", caption = "Fuente: INE.")
+  labs(x = "Años", y = "Porcentaje de hogares", caption = "Fuente: INE.")
 ggplotly(g1, tooltip = "text")
 
 ```
@@ -101,12 +107,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Número de emisiones totales de C02 pér cápita__
+
 ```{r}
 g2 <- ggplot(data = db2, aes(x = year, y = emisiones, 
                              text = paste("Año: ", year, "<br>Número: ", round(emisiones,2) ))) + 
   geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c(2000:2016)) +  theme_gray() + 
-  labs(x = "Años", y = "Emisiones de C02 per cápita", title = "Número de emisiones totales de C02 pér cápita", caption = "Fuente: CEPALSTAT.")
+  labs(x = "Años", y = "Emisiones de C02 per cápita", caption = "Fuente: CEPALSTAT.")
 ggplotly(g2, tooltip = "text")
 ```
  
@@ -151,12 +159,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Pérdida de cobertura arbórea anual__
+
 ```{r}
 g3 <- ggplot(data = db3, aes(x = year, y = deforestacion, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(deforestacion,2) ))) + 
   geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c(2001:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Tasa de pérdida anual", title = "Pérdida de cobertura arbórea anual", caption = "Fuente: Global Forest Watch.")
+  labs(x = "Años", y = "Tasa de pérdida anual", caption = "Fuente: Global Forest Watch.")
 ggplotly(g3, tooltip = "text")
 ```
  
@@ -203,13 +213,15 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Porcentaje de áreas protegidas respecto a al superficie total del país__
+
 ```{r}
 db4$year <- as.character(db4$year)
 g4 <- ggplot(data = db4, aes(x = year, y = areas, 
                              text = paste("Año: ", year, "<br>Porcentaje: ", round(areas,2) ))) + 
   geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c("1990", "2000", "2014")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la superficie total", title = "Porcentaje de áreas protegidas respecto a al superficie total del país", caption = "Fuente: Cepalstat")
+  labs(x = "Años", y = "Porcentaje de la superficie total", caption = "Fuente: Cepalstat")
 ggplotly(g4, tooltip = "text")
 ```
  
@@ -253,12 +265,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__Consumo de agua potable total__
+
 ```{r}
 g5 <- ggplot(data = db5, aes(x = year, y = agua, 
                              text = paste("Año: ", year, "<br>Consumo: ", round(agua,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2005:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Miles de metros cúbicos", title = "Consumo de agua potable total", caption = "Fuente: INE.")
+  labs(x = "Años", y = "Miles de metros cúbicos", caption = "Fuente: INE.")
 ggplotly(g5, tooltip = "text")
 
 ```
