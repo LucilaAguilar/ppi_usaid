@@ -2,7 +2,12 @@
 title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "twitter", "facebook", "menu" ]
+    
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
     theme: readable
     logo: logo_proy4.png
 editor_options: 
@@ -29,6 +34,7 @@ library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
+library(scales)
 #base de datos
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/educacion.RData"))
 #setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
@@ -45,12 +51,16 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__NÚMERO DE ESTUDIANTES MATRICULADOS, SEGÚN NIVEL DE ESCOLARIDAD__
+
 ```{r}
+
 g1 <- ggplot(data = db1, aes(x = year, y = matriculados, fill = primaria,  
                              text = paste("Año: ", year, "<br>Número: ", round(matriculados,0) ))) + 
-  geom_bar(stat = "identity", position = position_dodge()) + 
+  geom_bar(stat = "identity", position = position_dodge()) +
+  scale_y_continuous(labels = comma) +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Número de estudiantes matriculados", title = "Número de estudiantes matriculados, \n según nivel de escolaridad", fill = "Nivel")
+  labs(x = "Años", y = "Número de estudiantes matriculados", fill = "Nivel")
 ggplotly(g1, tooltip = "text")
 ```
  
@@ -82,12 +92,14 @@ Column {data-width=650}
 
 ### __SERIE HISTÓRICA__
 
+__TASA NETA DE MATRICULACIÓN, SEGÚN NIVEL DE ESCOLARIDAD__
+
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = net_mat, group = primaria, 
                              color = primaria, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(net_mat,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Tasa neta de matriculación, \n según nivel de escolaridad", caption = "Fuente: INE.", color = "Nivel")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: INE.", color = "Nivel")
 ggplotly(g2, tooltip = "text")
 ```
  
@@ -132,12 +144,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__TASA DE ABANDONO ESCOLAR, SEGÚN NIVEL DE ESCOLARIDAD__
+
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = abandono, group = primaria, 
                              color = primaria,  
                              text = paste("Año: ", year, "<br>Tasa: ", round(abandono,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Tasa de abandono escolar, \n según nivel de escolaridad", color = "Nivel", caption = "Fuente: SEIE")
+  labs(x = "Años", y = "En porcentaje", color = "Nivel", caption = "Fuente: SEIE.")
 ggplotly(g3, tooltip = "text")
 ```
  
@@ -181,12 +195,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__GASTO EN EDUCACIÓN, COMO PORCENTAJE DEL PIB__
+
 ```{r}
 g4 <- ggplot(data = na.omit(db2), aes(x = year, y = gasto_edu_pib, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(gasto_edu_pib,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2006:2018)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Gasto en educación, \n como porcentaje del PIB", caption = "Fuente: SEIE.")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: SEIE.")
 ggplotly(g4, tooltip = "text")
 ```
  
@@ -230,11 +246,13 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__TASA DE MATRICULACIÓN BRUTA, EDUCACIÓN TERCIARIA__
+
 ```{r}
 g5 <- ggplot(data = na.omit(db2), aes(x = year, y = educ_terc_raw, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(educ_terc_raw, 2) ))) + geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3)+
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Tasa de matriculación bruta, educación terciaria", caption = "Fuente: INE")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: INE")
 ggplotly(g5, tooltip = "text")
 ```
  

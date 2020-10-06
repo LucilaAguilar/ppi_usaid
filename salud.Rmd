@@ -2,7 +2,12 @@
 title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "twitter", "facebook", "menu" ]
+    
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
     theme: readable
     logo: logo_proy4.png
 editor_options: 
@@ -40,12 +45,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__NÚMERO DE ESTABLECIMIENTOS DE SALUD__
+
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = construccion, fill = level,  
                              text = paste("Año: ", year, "<br>Número: ", round(construccion,0) ))) + 
   geom_bar(stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Número de establecimientos de salud", title = "Número de establecimientos de salud, \n según nivel", fill = "Nivel")
+  labs(x = "Años", y = "Número de establecimientos de salud", fill = "Nivel")
 ggplotly(g1, tooltip = "text")
 ```
  
@@ -87,12 +94,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__PORCENTAJE DE PERSONAS QUE CUENTAN \N CON SEGURO DE SALUD__
+
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = seguro,  
                              text = paste("Año: ", year, "<br>Valor: ", round(seguro,2) ))) + 
   geom_bar(stat = "identity", colour = "#00AFBB", fill = "#00AFBB") + 
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Porcentaje de personas que cuentan \n con seguro de salud")
+  labs(x = "Años", y = "En porcentaje")
 ggplotly(g2, tooltip = "text")
 ```
 
@@ -132,14 +141,16 @@ __Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de 
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__    
+### __SERIE HISTÓRICA__
+
+__TASA DE MORTALIDAD, MENORES DE 5 AÑOS (POR CADA 1.000)__
 
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = mort_inf, 
                              text = paste("Año: ", year, "<br>Valor: ", round(mort_inf,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Tasa de mortalidad, menores de 5 años (por cada 1.000)", caption = "Fuente: BM.")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: BM.")
 ggplotly(g3, tooltip = "text")
 ```
 
@@ -181,14 +192,16 @@ __Referencia bibliográfica:__ Organización Mundial de la Salud (OMS).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__    
+### __SERIE HISTÓRICA__
+
+__PREVALENCIA DE ANEMIA EN LA INFANCIA (% DE MENORES DE 5 AÑOS)__
 
 ```{r}
 g4 <- ggplot(data = db2, aes(x = year, y = prev_anemia, 
                              text = paste("Año: ", year, "<br>Valor: ", round(prev_anemia,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(1989, 1994, 1998, 2003, 2008, 2012, 2016)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Prevalencia de anemia en la infancia (% de menores de 5 años)", caption = "Fuente: BM.")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: BM.")
 ggplotly(g4, tooltip = "text")
 ```
 
@@ -230,7 +243,9 @@ __Referencia bibliográfica:__ Banco Mundial (BM).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__    
+### __SERIE HISTÓRICA__  
+
+__MADRES ADOLESCENTES (% DE MUJERES ENTRE 15 Y 19 AÑOS QUE TUVIERON HIJOS O SE ENCUENTRAN EMBARAZADAS)__
 
 ```{r}
 db2$year <- as.character(db2$year)
@@ -238,7 +253,7 @@ g5 <- ggplot(data = db2, aes(x = year, y = m_adolescent,
                              text = paste("Año: ", year, "<br>Valor: ", round(m_adolescent,2) ))) + 
   geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
   scale_x_discrete(limits = c("1989", "1994", "1998", "2003", "2008", "2016")) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Madres adolescentes (% de mujeres entre 15 y 19 años que \n tuvieron hijos o se encuentran embarazadas)", caption = "Fuente: BM.")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: BM.")
 
 ggplotly(g5, tooltip = "text")
 ```
