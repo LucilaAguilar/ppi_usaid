@@ -3,6 +3,10 @@ title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
     social: [ "twitter", "facebook", "menu" ]
+    navsocial:
+    - {icon: "fa-twitter", href: "", align: right}
+    - {icon: "fa-facebook", href: "https://es-la.facebook.com/FundacionARU/", align: right}
+    - {icon: "fa-menu", href: "", align: right}
     theme: readable
     logo: logo_proy4.png
 editor_options: 
@@ -40,12 +44,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+##### Número de estudiantes matriculados, según nivel de escolaridad
+
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = pib, 
                              text = paste("Año: ", year, "<br>Valor: ", round(pib,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Crecimiento económico", caption = "Fuente: INE.")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: INE.")
 ggplotly(g1, tooltip = "text")
 ```
  
