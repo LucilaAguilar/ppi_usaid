@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
-    logo: logo2.png
+    logo: logo_proy4.png
 #runtime: shiny
 editor_options: 
   chunk_output_type: console
@@ -42,16 +42,6 @@ db3 <- db %>% filter(year>=2001)
 db4 <- db %>% filter(year==1990 | year==2000 | year==2014)
 db5 <- db %>% filter(year>=2008 & year <= 2018)
 ```
-
-#### __INDICADORES VINCULADOS A PROGRAMAS ELECTORALES__
-
-##### Acerca de
-
-Iniciativa de Fundación Aru
-
-##### Financiamiento
-
-Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
 
 # Manejo adecuado de residuos sólidos {data-navmenu="Medio Ambiente" data-icon="fa-list"}
 

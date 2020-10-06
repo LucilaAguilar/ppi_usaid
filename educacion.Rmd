@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
-    logo: logo2.png
+    logo: logo_proy4.png
 editor_options: 
   chunk_output_type: console
 ---
@@ -37,20 +37,6 @@ db1 <- db %>% filter(year >= 2011)
 #db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = #T), stringsAsFactor = T)
 ```
 
-
-###
-
-#### Organizaciones Políticas
-
-
-
-##### Acerca de
-
-Iniciativa de Fundación Aru
-
-##### Financiamiento
-
-Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
 
 # Número de estudiantes matriculados {data-navmenu="Educación" data-icon="fa-list"}
 

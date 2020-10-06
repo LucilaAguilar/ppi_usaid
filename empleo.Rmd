@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
-    logo: logo2.png
+    logo: logo_proy4.png
 #runtime: shiny
 editor_options: 
   chunk_output_type: console
@@ -42,16 +42,6 @@ db4 <- db2 %>% select(year, sector_a, sector_b, sector_c,)
 
 
 ```
-
-#### __INDICADORES VINCULADOS A PROGRAMAS ELECTORALES__
-
-##### Acerca de
-
-Iniciativa de Fundación Aru
-
-##### Financiamiento
-
-Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
 
 # Tasa de informalidad {data-navmenu="Empleo" data-icon="fa-list"}
 

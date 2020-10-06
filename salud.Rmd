@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     social: [ "twitter", "facebook", "menu" ]
     theme: readable
-    logo: logo2.png
+    logo: logo_proy4.png
 editor_options: 
   chunk_output_type: console
 ---
@@ -32,19 +32,6 @@ load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/salud.RData"
 #db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), #stringsAsFactor = T)
 #db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), #stringsAsFactor = T)
 ```
-
-
-###
-
-#### __INDICADORES VINCULADOS A PROGRAMAS ELECTORALES__
-
-##### Acerca de
-
-Iniciativa de Fundación Aru
-
-##### Financiamiento
-
-Financiada por Fundación Aru. Si desea contribuir a la iniciativa no dude en contactarse al correo fundacion@aru.org.bo
 
 # Establecimientos de salud {data-navmenu="Salud" data-icon="fa-list"}
 
