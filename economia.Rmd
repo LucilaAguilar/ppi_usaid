@@ -2,11 +2,12 @@
 title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
-    social: [ "twitter", "facebook", "menu" ]
-    navsocial:
-    - {icon: "fa-twitter", href: "", align: right}
-    - {icon: "fa-facebook", href: "https://es-la.facebook.com/FundacionARU/", align: right}
-    - {icon: "fa-menu", href: "", align: right}
+    
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
     theme: readable
     logo: logo_proy4.png
 editor_options: 
@@ -44,7 +45,7 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
-##### Número de estudiantes matriculados, según nivel de escolaridad
+__CRECIMIENTO ECONÓMICO__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = pib, 
@@ -95,13 +96,15 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__EVOLUCIÓN DEL SALDO COMERCIAL__
+
 ```{r}
 g2 <- ggplot(data = db, aes(x = year, y = comercial/1000,  
                              text = paste("Año: ", year, "<br>Saldo: $ ", round(comercial/1000,1) ))) + 
   geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
   scale_y_continuous(labels=dollar_format(prefix="$")) +
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En millones de dólares estadounidenses", title = "Evolucion del saldo comercial")
+  labs(x = "Años", y = "En millones de dólares estadounidenses")
 ggplotly(g2, tooltip = "text")
 ```
 
@@ -145,13 +148,15 @@ Column {data-width=600}
     
 ### __SERIE HISTÓRICA__
 
+__EVOLUCIÓN DE LA INVERSIÓN PÚBLICA__
+
 ```{r}
 g3 <- ggplot(data = na.omit(db), aes(x = year, y = inversion/1000,  
                              text = paste("Año: ", year, "<br>Valor: $ ", round(inversion/1000,1) ))) + 
   geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") + 
   scale_y_continuous(labels=dollar_format(prefix="$")) +
   scale_x_discrete(limits = c(2010:2018)) +  theme_gray() + 
-  labs(x = "Años", y = "En millones de dólares", title = "Evolucion de la inversión pública")
+  labs(x = "Años", y = "En millones de dólares")
 ggplotly(g3, tooltip = "text")
 ```
 
@@ -185,12 +190,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__EVOLUCIÓN DEL DÉFICIT/SUPERÁVIT FISCAL, COMO PORCENTAJE DEL PIB__
+
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = fiscal, 
                              text = paste("Año: ", year, "<br>Valor: ", round(fiscal,2), "%" ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Evolución del déficit/superávit fiscal, \n como % del PIB", caption = "Fuente: INE.")
+  labs(x = "Años", y = "En porcentaje")
 ggplotly(g1, tooltip = "text")
 ```
  
@@ -231,12 +238,14 @@ Column {data-width=600}
 
 ### __SERIE HISTÓRICA__
 
+__VARIACIÓN PORCENTUAL ACUMULADA DEL ÍNDICE DE PRECIOS AL CONSUMIDOR__
+
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = ipc, 
                              text = paste("Año: ", year, "<br>Valor: ", round(ipc,2) ))) + 
   geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", title = "Variación porcentual acumulada del índice de precios al consumidor", caption = "Fuente: INE.")
+  labs(x = "Años", y = "En porcentaje")
 ggplotly(g1, tooltip = "text")
 ```
  
