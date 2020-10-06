@@ -1,0 +1,309 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+#runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(wordcloud)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+
+#db <- as.data.frame(read_excel("D:/ARU/PPI USAID/_data/indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
+#db1 <- db %>% filter(year >= 2011)
+#db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_ambiental.xlsx", range = "A1:F22", col_names = T), stringsAsFactor = T)
+#save(db, file = "medioambiente.RData")
+#base de datos
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/medioambiente.RData"))
+db1 <- db %>% filter(year >= 2005)
+db2 <- db %>% filter(year>=2000 & year <= 2016)
+db3 <- db %>% filter(year>=2001)
+db4 <- db %>% filter(year==1990 | year==2000 | year==2014)
+db5 <- db %>% filter(year>=2008 & year <= 2018)
+```
+
+# Manejo adecuado de residuos sólidos {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+__Hogares con un adecuado manejo de disposición de residuos sólidos__
+
+```{r}
+db1$year <- as.character(db1$year)
+g1 <- ggplot(data = db1, aes(x = year, y = basura, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(basura,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c("2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje de hogares", caption = "Fuente: INE.")
+ggplotly(g1, tooltip = "text")
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Manejo adecuado de residuos sólidos 
+
+__Definición:__ Hogares que en un determinado año declaran que disponen de los residuos sólidos por medio del servicio público de recolección o lo deposita en un basurero o contenedor. 
+
+__Metodología de cálculo:__ 
+
+$$ RS_{rec}(t) =\dfrac{\sum_{i}^{N}Hma_i(t)}{TH(t)}*100 $$
+
+Donde:
+
+- $RS_{rec}(t)$: Porcentaje de hogares que realizan un manejo adecuado de residuos sólidos respecto al total de hogares en el año $t$.
+
+- $\sum_{i}^{N}Hma_i(t)$: Número de hogares que realizan un manejo adecuado de residuos sólidos en el año $t$.
+
+- $TH(t)$: Total de hogares en el año $t$.
+
+__Unidad de medida:__ Porcentaje (\%)
+
+__Interpretación:__ Del total de hogares en el territorio nacional en el año $t$ "x" porcentaje de hogares disponieron de los residuos sólidos generados por el mismo hogar de manera adecuada.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2005-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Indicadores de progreso de los Objetivos de Desarrollo Sostenible (ODS)
+
+# Emsiones total de C02 por habitante {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+__Número de emisiones totales de C02 pér cápita__
+
+```{r}
+g2 <- ggplot(data = db2, aes(x = year, y = emisiones, 
+                             text = paste("Año: ", year, "<br>Número: ", round(emisiones,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c(2000:2016)) +  theme_gray() + 
+  labs(x = "Años", y = "Emisiones de C02 per cápita", caption = "Fuente: CEPALSTAT.")
+ggplotly(g2, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Emisiones totales de dióxido de carbono ($C0_2$) por habitante
+
+__Definición:__ Liberación de gases de efecto invernadero y/o de sus precursores en la atmósfera, en este caso de $C0_2$ en el terriotorio nacional y en un período determinado. Estas emisiones corresponden a las generadas por la quema de combustibles fósiles, la producción de cemento y las emisiones generadas por los cambios en el uso de suelo y silvicultura.
+
+__Metodología de cálculo:__ 
+
+$$ EPC_{CO_2}(t) =\dfrac{ET_{C0_2}(t)}{PT(t)} $$
+
+Donde:
+
+- $EPC_{CO_2}(t)$: Emisiones de $C0_2$ por habitante $t$.
+
+- $ET_{C0_2}(t)$: Emisiones totales de $C0_2$ en todo el territorio nacional en el año $t$.
+
+- $PT(t)$: Población total en el país en el año $t$.
+
+__Unidad de medida:__ Toneladas de $C0_2$ por habitante
+
+__Interpretación:__ En en el año $t$ se emitieron "x" toneladas, en promedio, de $C0_2$ por habitante a la atmósfera.  
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadísticas de la CEPAL: Cepalstat
+
+__Referencia bibliográfica__ Cepalstat
+
+
+# Tasa de pérdida de cobertura arbórea anual {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+__Pérdida de cobertura arbórea anual__
+
+```{r}
+g3 <- ggplot(data = db3, aes(x = year, y = deforestacion, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(deforestacion,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c(2001:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Tasa de pérdida anual", caption = "Fuente: Global Forest Watch.")
+ggplotly(g3, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Tasa de pérdida de cobertura arbórea anual
+
+__Definición:__ Pérdida de cobertura arbórea año por año, definida como el reemplazo a nivel de parcela de la vegetación mayor de 5 metros, con una cobertura arbórea mayor al 30\% dentro de un área determinada. La "cubierta arbórea" se define como la presencia biofísica de los árboles en forma de bosques naturales o plantaciones existentes en toda una variedad de densidades de doseles arbóreos. La pérdida de cobertura arbórea incluye cambios tanto en bosques naturales como en plantados que sean resultado de varios factores incluyendo la deforestación, incendios, muerte de la cobertura arbórea por enfermedades, daños por tormentas, entre otros.
+
+__Metodología de cálculo:__
+
+$$ TPCA^{b}_{t} =\dfrac{PCA_{}(t)}{CA(b)}*100 $$
+
+Donde:
+
+- $TPCA^{b}_{t}$: Tasa de pérdida de cobertura arbórea en el año $t$ respecto a la cobertura arbórea registrada en el año base $b$.
+
+- $PCA_{}(t)$: Pérdida de conertura arbórea en el año $t$.
+
+- $CA(b)$: Cobertura arbórea en el año $t$.
+
+- $(b)$: El año base corresponde al año 2000.
+
+__Unidad de medida:__ Tasa de pérdida respecto al año base.
+
+__Interpretación:__ En el año $t$ se registró una pérdida de cobertura arbórea equivalente a una disminución del "x" de la cobertura arbórea regitrada el año 2000.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Global Forest Watch
+
+__Referencia bibliográfica:__ World Resources Institute
+
+
+# Proporción de área terrestres y marinas protegidas {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+__Porcentaje de áreas protegidas respecto a al superficie total del país__
+
+```{r}
+db4$year <- as.character(db4$year)
+g4 <- ggplot(data = db4, aes(x = year, y = areas, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(areas,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c("1990", "2000", "2014")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje de la superficie total", caption = "Fuente: Cepalstat")
+ggplotly(g4, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Proporción de áreas terrestres y marinas protegidas
+
+__Definición:__ Este indicador presenta información sobre la superficie de áreas protegidas totales (terrestres y marinas), respecto del área territorial total (terrestre y marina) de un país. Un área protegida se refiere al área terrestre o marina especialmente dedicada a la protección y mantenimiento de la diversidad biológica, así como de los recursos naturales y culturales asociados, administradas de acuerdo con criterios legales u otro medio eficaz.
+
+__Metodología de cálculo:__
+
+$$ PAP(t) =\dfrac{AP(t)}{AT(t)}*100 $$
+
+Donde:
+
+- $PAP(t)$: Proporción de áreas terrestres y marinas que se encuentran protegidas en el año $t$.
+
+- $AP(t)$: Superficie total de áreas terrestres y marinas protegidas en el año $t$.
+
+- $AT(t)$: Superficie territorial (terrestre y marino) total en el año $t$.
+
+__Unidad de medida:__ Porcentaje (\%)
+
+__Interpretación:__ "x" porcentaje del total de la superficie territorial en el año $t$ se encuentra como un área protegida.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadística de la Cepal. Cepalstat
+
+__Referencia bibliográfica__ Cepalstat
+
+# Consumo de agua potable {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__
+
+__Consumo de agua potable total__
+
+```{r}
+g5 <- ggplot(data = db5, aes(x = year, y = agua, 
+                             text = paste("Año: ", year, "<br>Consumo: ", round(agua,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2005:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Miles de metros cúbicos", caption = "Fuente: INE.")
+ggplotly(g5, tooltip = "text")
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Consumo de agua potable
+
+__Definición:__ Consumo de agua potable total dentro del territorio nacional que incluye el consumo comercial, doméstico, estatal e industrial.
+
+__Metodología de cálculo:__
+
+$$ CA_{tot}(t) =\sum_{i}^{N}CA_i $$
+
+Donde:
+
+- $CA_{tot}(t)$: Consumo de agua potable total en el año $t$.
+
+- $\sum_{i}^{N}CA_i$: Consumo de agua total en la categoría $i$.
+
+__Unidad de medida:__ Miles de metros cúbicos
+
+__Interpretación:__ En el año $t$ se consumio un total de "x" mile sde metros cúbicos de agua potable.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Indicadores de progreso de los Objetivos de Desarrollo Sostenible (ODS)
