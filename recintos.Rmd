@@ -23,8 +23,7 @@ library(dplyr)
 load("D:/ARU/PPI USAID/_in/20oct_v2020.RData")
 ```
 
-Bolivia
-===================================== 
+# Bolivia {data-navmenu="Desagregaciones" data-icon="fa-list"}
 
 Column {data-width=1000}
 -----------------------------------------------------------------------
@@ -58,8 +57,7 @@ DT::datatable(bd_computo, style = "bootstrap", fillContainer = T,
 
 ```
 
-Exterior
-===================================== 
+# Exterior {data-navmenu="Desagregaciones" data-icon="fa-list"}
 
 Column {data-width=1000}
 -----------------------------------------------------------------------
@@ -88,8 +86,7 @@ DT::datatable(bd_computo, style = "bootstrap", fillContainer = T,
               ))
 ```
 
-TREP1
-===================================== 
+# TREP1 {data-navmenu="Desagregaciones" data-icon="fa-list"}
    
 Column {data-width=500}
 -----------------------------------------------------------------------
@@ -166,8 +163,7 @@ DT::datatable(bd2, style = "bootstrap", fillContainer = T,
               ))
 ```
 
-TREP2
-===================================== 
+# TREP2 {data-navmenu="Desagregaciones" data-icon="fa-list"}
    
 Column {data-width=500}
 -----------------------------------------------------------------------
