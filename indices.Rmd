@@ -1,0 +1,1425 @@
+---
+title: "INDICADORES E ÍNDICES ELECTORALES - ELECCIONES PARA PRESIDENTE Y VICEPRESIDENTE"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    vertical_layout: fill
+    navbar:
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r echo=F,message=F,warning=T,results=F}
+# Se habilitan las librerías necesarias
+library(flexdashboard)
+library(dplyr)
+library(readxl)
+library(wordcloud)
+library(tm)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(knitr)
+library(data.table)
+library(Rfast)
+# Directorio de trabajo
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("computo.xlsx", range = "A1:Z68133", col_names = T), stringsAsFactor = T)
+
+#save(db, file = "computo.RData")
+#base de datos
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/computo.RData"))
+
+#db <- db %>% mutate(resto = fpv + mts + ucs + mnr + panbol)
+
+#db1 <- db %>% filter(Elección=="Presidente y Vicepresidente")
+#db2 <- db %>% filter(Elección=="Diputados Uninominales")
+#db3 <- db %>% filter(Elección=="Diputados Especiales")
+
+db1<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1]) %>% group_by(País)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db1_1<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País!="Bolivia") %>% group_by(País,Departamento)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db1_2<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País!="Bolivia") %>% group_by(País,Departamento,Provincia)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db1_3<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País!="Bolivia") %>% group_by(País,Departamento,Provincia,Municipio)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db1_4<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País!="Bolivia") %>% group_by(País,Departamento,Provincia,Municipio,Localidad)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db1_5<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País!="Bolivia") %>% group_by(País,Departamento,Provincia,Municipio,Localidad,Recinto)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db2<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País=="Bolivia") %>% group_by(Departamento)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db3<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País=="Bolivia") %>% group_by(Departamento,Provincia)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db4<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País=="Bolivia") %>% group_by(Departamento,Provincia,Municipio)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db5<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País=="Bolivia") %>% group_by(Departamento,Provincia,Municipio,Localidad)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+db6<-db %>% rename(p21F=19) %>%  filter(Elección==unique(Elección)[1] & País=="Bolivia") %>% group_by(Departamento,Provincia,Municipio,Localidad,Recinto)%>% summarise(CC=sum(CC),MAS=sum(`MAS - IPSP`),PDC=sum(PDC),P21F=sum(p21F),Resto=sum(FPV,MTS,UCS,MNR,`PAN-BOL`), INSCRITOS=sum(Inscritos), VALIDOS=sum(`Votos Válidos`)) 
+
+
+```
+
+Mundo {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de países__
+
+```{r}
+#Proporción de votos
+db1 <- db1 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1 <- db1 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1 <- db1 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1 <- db1 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1$cc_sq,db1$mas_sq,db1$pdc_sq,db1$p21f_sq,db1$resto_sq)
+
+db1$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1 <- db1 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1 <- db1 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1 <- db1 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1$cc_log,db1$mas_log,db1$pdc_log,db1$p21f_log,db1$resto_log)
+
+db1$sum_log <- rowSums(db1[, 28:32], na.rm = T)
+
+
+
+#Índice de concentración
+db1 <- db1 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1$p12,db1$p13,db1$p14,db1$p15,db1$p23,db1$p24,db1$p25,db1$p34,db1$p35,db1$p45)
+
+db1$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1$País,db1$cc_prop,db1$mas_prop,db1$pdc_prop,db1$p21f_prop,db1$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1 <- db1 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1 <- db1 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1 <- db1 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1 <- db1 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1 %>% select(País, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1 <- db1 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+
+
+Otros países-Departamentos {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de departamentos de otros países__
+
+```{r}
+#Proporción de votos
+db1_1 <- db1_1 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1_1 <- db1_1 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1_1 <- db1_1 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1_1 <- db1_1 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1_1$cc_sq,db1_1$mas_sq,db1_1$pdc_sq,db1_1$p21f_sq,db1_1$resto_sq)
+
+db1_1$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1_1 <- db1_1 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1_1 <- db1_1 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1_1 <- db1_1 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1_1$cc_log,db1_1$mas_log,db1_1$pdc_log,db1_1$p21f_log,db1_1$resto_log)
+
+db1_1$sum_log <- rowSums(db1_1[, 29:33], na.rm = T)
+
+
+
+
+#Índice de concentración
+db1_1 <- db1_1 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1_1$p12,db1_1$p13,db1_1$p14,db1_1$p15,db1_1$p23,db1_1$p24,db1_1$p25,db1_1$p34,db1_1$p35,db1_1$p45)
+
+db1_1$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1_1$País,db1_1$cc_prop,db1_1$mas_prop,db1_1$pdc_prop,db1_1$p21f_prop,db1_1$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1_1 <- db1_1 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1_1 <- db1_1 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1_1 <- db1_1 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1_1 <- db1_1 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1_1 %>% select(País, Departamento, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1_1 <- db1_1 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+
+
+Otros países-Provincias {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de provincias de otros países__
+
+```{r}
+#Proporción de votos
+db1_2 <- db1_2 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1_2 <- db1_2 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1_2 <- db1_2 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1_2 <- db1_2 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1_2$cc_sq,db1_2$mas_sq,db1_2$pdc_sq,db1_2$p21f_sq,db1_2$resto_sq)
+
+db1_2$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1_2 <- db1_2 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1_2 <- db1_2 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1_2 <- db1_2 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1_2$cc_log,db1_2$mas_log,db1_2$pdc_log,db1_2$p21f_log,db1_2$resto_log)
+
+db1_2$sum_log <- rowSums(db1_2[, 30:34], na.rm = T)
+
+
+
+#Índice de concentración
+db1_2 <- db1_2 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1_2$p12,db1_2$p13,db1_2$p14,db1_2$p15,db1_2$p23,db1_2$p24,db1_2$p25,db1_2$p34,db1_2$p35,db1_2$p45)
+
+db1_2$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1_2$País,db1_2$cc_prop,db1_2$mas_prop,db1_2$pdc_prop,db1_2$p21f_prop,db1_2$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1_2 <- db1_2 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1_2 <- db1_2 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1_2 <- db1_2 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1_2 <- db1_2 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1_2 %>% select(País, Departamento, Provincia, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1_2 <- db1_2 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+Otros países-Municipios {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de municipios de otros países__
+
+```{r}
+#Proporción de votos
+db1_3 <- db1_3 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1_3 <- db1_3 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1_3 <- db1_3 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1_3 <- db1_3 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1_3$cc_sq,db1_3$mas_sq,db1_3$pdc_sq,db1_3$p21f_sq,db1_3$resto_sq)
+
+db1_3$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1_3 <- db1_3 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1_3 <- db1_3 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1_3 <- db1_3 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1_3$cc_log,db1_3$mas_log,db1_3$pdc_log,db1_3$p21f_log,db1_3$resto_log)
+
+db1_3$sum_log <- rowSums(db1_3[, 31:35], na.rm = T)
+
+
+
+#Índice de concentración
+db1_3 <- db1_3 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1_3$p12,db1_3$p13,db1_3$p14,db1_3$p15,db1_3$p23,db1_3$p24,db1_3$p25,db1_3$p34,db1_3$p35,db1_3$p45)
+
+db1_3$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1_3$País,db1_3$cc_prop,db1_3$mas_prop,db1_3$pdc_prop,db1_3$p21f_prop,db1_3$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1_3 <- db1_3 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1_3 <- db1_3 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1_3 <- db1_3 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1_3 <- db1_3 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1_3 %>% select(País, Departamento, Provincia, Municipio, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1_3 <- db1_3 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+Otros países-Localidades {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de localidades de otros países__
+
+```{r}
+#Proporción de votos
+db1_4 <- db1_4 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1_4 <- db1_4 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1_4 <- db1_4 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1_4 <- db1_4 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1_4$cc_sq,db1_4$mas_sq,db1_4$pdc_sq,db1_4$p21f_sq,db1_4$resto_sq)
+
+db1_4$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1_4 <- db1_4 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1_4 <- db1_4 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1_4 <- db1_4 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1_4$cc_log,db1_4$mas_log,db1_4$pdc_log,db1_4$p21f_log,db1_4$resto_log)
+
+db1_4$sum_log <- rowSums(db1_4[, 32:36], na.rm = T)
+
+
+
+#Índice de concentración
+db1_4 <- db1_4 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1_4$p12,db1_4$p13,db1_4$p14,db1_4$p15,db1_4$p23,db1_4$p24,db1_4$p25,db1_4$p34,db1_4$p35,db1_4$p45)
+
+db1_4$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1_4$País,db1_4$cc_prop,db1_4$mas_prop,db1_4$pdc_prop,db1_4$p21f_prop,db1_4$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1_4 <- db1_4 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1_4 <- db1_4 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1_4 <- db1_4 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1_4 <- db1_4 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1_4 %>% select(País, Departamento, Provincia, Municipio, Localidad, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1_4 <- db1_4 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(LOCALIDAD = Localidad)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+Otros países-Recintos {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de recintos de otros países__
+
+```{r}
+#Proporción de votos
+db1_5 <- db1_5 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db1_5 <- db1_5 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db1_5 <- db1_5 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db1_5 <- db1_5 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db1_5$cc_sq,db1_5$mas_sq,db1_5$pdc_sq,db1_5$p21f_sq,db1_5$resto_sq)
+
+db1_5$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db1_5 <- db1_5 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db1_5 <- db1_5 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db1_5 <- db1_5 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db1_5$cc_log,db1_5$mas_log,db1_5$pdc_log,db1_5$p21f_log,db1_5$resto_log)
+
+db1_5$sum_log <- rowSums(db1_5[, 33:37], na.rm = T)
+
+
+
+#Índice de concentración
+db1_5 <- db1_5 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db1_5$p12,db1_5$p13,db1_5$p14,db1_5$p15,db1_5$p23,db1_5$p24,db1_5$p25,db1_5$p34,db1_5$p35,db1_5$p45)
+
+db1_5$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db1_5$País,db1_5$cc_prop,db1_5$mas_prop,db1_5$pdc_prop,db1_5$p21f_prop,db1_5$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db1_5 <- db1_5 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db1_5 <- db1_5 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db1_5 <- db1_5 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db1_5 <- db1_5 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db1_5 %>% select(País, Departamento, Provincia, Municipio, Localidad, Recinto, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db1_5 <- db1_5 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(PAÍS = País)
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(LOCALIDAD = Localidad)
+df1 <- df1 %>% rename(RECINTO = Recinto)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+Bolivia-Departamentos {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de departamentos__
+
+```{r}
+#Proporción de votos
+db2 <- db2 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db2 <- db2 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db2 <- db2 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db2 <- db2 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db2$cc_sq,db2$mas_sq,db2$pdc_sq,db2$p21f_sq,db2$resto_sq)
+
+db2$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db2 <- db2 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db2 <- db2 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db2 <- db2 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db2$cc_log,db2$mas_log,db2$pdc_log,db2$p21f_log,db2$resto_log)
+
+db2$sum_log <- rowSums(db2[, 28:32], na.rm = T)
+
+
+
+#Índice de concentración
+db2 <- db2 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db2$p12,db2$p13,db2$p14,db2$p15,db2$p23,db2$p24,db2$p25,db2$p34,db2$p35,db2$p45)
+
+db2$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db2$País,db2$cc_prop,db2$mas_prop,db2$pdc_prop,db2$p21f_prop,db2$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db2 <- db2 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db2 <- db2 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db2 <- db2 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db2 <- db2 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db2 %>% select(Departamento, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db2 <- db2 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+Bolivia-Provincias {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de provincias__
+
+```{r}
+#Proporción de votos
+db3 <- db3 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db3 <- db3 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db3 <- db3 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db3 <- db3 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db3$cc_sq,db3$mas_sq,db3$pdc_sq,db3$p21f_sq,db3$resto_sq)
+
+db3$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db3 <- db3 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db3 <- db3 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db3 <- db3 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db3$cc_log,db3$mas_log,db3$pdc_log,db3$p21f_log,db3$resto_log)
+
+db3$sum_log <- rowSums(db3[, 29:33], na.rm = T)
+
+
+
+#Índice de concentración
+db3 <- db3 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db3$p12,db3$p13,db3$p14,db3$p15,db3$p23,db3$p24,db3$p25,db3$p34,db3$p35,db3$p45)
+
+db3$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db3$País,db3$cc_prop,db3$mas_prop,db3$pdc_prop,db3$p21f_prop,db3$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db3 <- db3 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db3 <- db3 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db3 <- db3 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db3 <- db3 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db3 %>% select(Departamento, Provincia, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db3 <- db3 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+Bolivia-Municipios {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de municipios__
+
+```{r}
+#Proporción de votos
+db4 <- db4 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db4 <- db4 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db4 <- db4 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db4 <- db4 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db4$cc_sq,db4$mas_sq,db4$pdc_sq,db4$p21f_sq,db4$resto_sq)
+
+db4$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db4 <- db4 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db4 <- db4 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db4 <- db4 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db4$cc_log,db4$mas_log,db4$pdc_log,db4$p21f_log,db4$resto_log)
+
+db4$sum_log <- rowSums(db4[, 30:34], na.rm = T)
+
+
+
+#Índice de concentración
+db4 <- db4 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db4$p12,db4$p13,db4$p14,db4$p15,db4$p23,db4$p24,db4$p25,db4$p34,db4$p35,db4$p45)
+
+db4$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db4$País,db4$cc_prop,db4$mas_prop,db4$pdc_prop,db4$p21f_prop,db4$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db4 <- db4 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db4 <- db4 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db4 <- db4 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db4 <- db4 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db4 %>% select(Departamento, Provincia, Municipio, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db4 <- db4 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+
+Bolivia-Localidades {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de localidades__
+
+```{r}
+#Proporción de votos
+db5 <- db5 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db5 <- db5 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db5 <- db5 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db5 <- db5 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db5$cc_sq,db5$mas_sq,db5$pdc_sq,db5$p21f_sq,db5$resto_sq)
+
+db5$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db5 <- db5 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db5 <- db5 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db5 <- db5 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db5$cc_log,db5$mas_log,db5$pdc_log,db5$p21f_log,db5$resto_log)
+
+db5$sum_log <- rowSums(db5[, 31:35], na.rm = T)
+
+
+
+#Índice de concentración
+db5 <- db5 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db5$p12,db5$p13,db5$p14,db5$p15,db5$p23,db5$p24,db5$p25,db5$p34,db5$p35,db5$p45)
+
+db5$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db5$País,db5$cc_prop,db5$mas_prop,db5$pdc_prop,db5$p21f_prop,db5$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db5 <- db5 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db5 <- db5 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db5 <- db5 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db5 <- db5 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db5 %>% select(Departamento, Provincia, Municipio, Localidad, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db5 <- db5 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(LOCALIDAD = Localidad)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+
+
+Bolivia-Recintos {data-navmenu="Desagregaciones" data-icon="fa-list"}
+===================================== 
+
+Column {data-width=1000}
+-----------------------------------------------------------------------
+
+### __Índices a nivel de recintos__
+
+```{r}
+#Proporción de votos
+db6 <- db6 %>% mutate(cc_prop = (CC/VALIDOS)*100, mas_prop = (MAS/VALIDOS)*100, pdc_prop = (PDC/VALIDOS)*100, p21f_prop = (P21F/VALIDOS)*100, resto_prop = (Resto/VALIDOS)*100)
+
+db6 <- db6 %>% mutate(sum_prop = cc_prop + mas_prop + pdc_prop + p21f_prop + resto_prop)
+
+#Proporción de votos al cuadrado
+db6 <- db6 %>% mutate(cc_sq = (cc_prop/100)^2, mas_sq = (mas_prop/100)^2, pdc_sq = (pdc_prop/100)^2, p21f_sq = (p21f_prop/100)^2, resto_sq = (resto_prop/100)^2)
+
+#Suma de los cuadrados
+db6 <- db6 %>% mutate(sum_sq = cc_sq + mas_sq + pdc_sq + p21f_sq + resto_sq)
+
+#Suma de los cuadrados menos el máximo
+dt<-data.frame(db6$cc_sq,db6$mas_sq,db6$pdc_sq,db6$p21f_sq,db6$resto_sq)
+
+db6$max<-apply(X=dt, MARGIN=1, FUN=max)
+
+db6 <- db6 %>% mutate(sum_sq2 = sum_sq - max)
+
+#Conversión a proporciones
+db6 <- db6 %>% mutate(cc_pp = (cc_prop/100), mas_pp = (mas_prop/100), pdc_pp = (pdc_prop/100), p21f_pp = (p21f_prop/100), resto_pp = (resto_prop/100))
+
+#Cálculo del logaritmo neperiano
+
+db6 <- db6 %>% mutate(cc_log = cc_pp*log(cc_pp), mas_log = mas_pp*log(mas_pp), pdc_log = pdc_pp*log(pdc_pp), p21f_log = pdc_pp*log(pdc_pp), resto_log = resto_pp*log(resto_pp))
+
+#Sumatoria de los logaritmos
+
+dt<-data.frame(db6$cc_log,db6$mas_log,db6$pdc_log,db6$p21f_log,db6$resto_log)
+
+db6$sum_log <- rowSums(db6[, 32:36], na.rm = T)
+
+
+
+#Índice de concentración
+db6 <- db6 %>% mutate(p12 = cc_pp + mas_pp, p13 = cc_pp + pdc_pp, p14 = cc_pp + p21f_pp, p15 = cc_pp + resto_pp, p23 = mas_pp + pdc_pp, p24 = mas_pp + p21f_pp, p25 = mas_pp + resto_pp, p34 = pdc_pp + p21f_pp, p35 = pdc_pp + resto_pp, p45 = p21f_pp + resto_pp)
+
+dt<-data.frame(db6$p12,db6$p13,db6$p14,db6$p15,db6$p23,db6$p24,db6$p25,db6$p34,db6$p35,db6$p45)
+
+db6$conc<-apply(X=dt, MARGIN=1, FUN=max)
+
+#Rfast::nth(dt, 2, descending = T)
+
+#dt %>% top_n(2)
+
+#dt<-data.frame(db6$País,db6$cc_prop,db6$mas_prop,db6$pdc_prop,db6$p21f_prop,db6$resto_prop)
+
+#dt2=data.frame(País=dt$País,t(apply(dt,1,function(x) names(x)[-1][order(x[-1],na.last=NA)][1:2])))
+#colnames(dt2)=c("País",paste0("Ranked",c(1:2)))
+
+#Índice de fragmentación
+
+db6 <- db6 %>% mutate(frag = 1 - sum_sq)
+
+#Índice NEP
+
+db6 <- db6 %>% mutate(nep = 1/sum_sq)
+
+#Índice NP
+
+db6 <- db6 %>% mutate(np = 1+((nep^2)*sum_sq2))
+
+#índice de hiperfraccionamiento (I)
+
+db6 <- db6 %>% mutate(hi = exp(-sum_log))
+
+
+
+df1 <- db6 %>% select(Departamento, Provincia, Municipio, Localidad, Recinto, INSCRITOS, VALIDOS, cc_prop, mas_prop, pdc_prop, p21f_prop, resto_prop, conc, frag, nep, np, hi)
+
+#db6 <- db6 %>% mutate(cc_prop=round(cc_prop,2))
+
+#df1[,4:12]<-round(prop.table(as.matrix(df1[,4:12])*100,1),2)
+#df1[,13]<-round(prop.table(df1[,13])*100,2)
+df1 <- df1 %>% mutate(cc_prop=round(cc_prop,2))
+df1 <- df1 %>% mutate(mas_prop=round(mas_prop,2))
+df1 <- df1 %>% mutate(pdc_prop=round(pdc_prop,2))
+df1 <- df1 %>% mutate(p21f_prop=round(p21f_prop,2))
+df1 <- df1 %>% mutate(resto_prop=round(resto_prop,2))
+df1 <- df1 %>% mutate(conc=round(conc,2))
+df1 <- df1 %>% mutate(frag=round(frag,2))
+df1 <- df1 %>% mutate(nep=round(nep,2))
+df1 <- df1 %>% mutate(np=round(np,2))
+df1 <- df1 %>% mutate(hi=round(hi,2))
+
+df1 <- df1 %>% rename(DEPARTAMENTO = Departamento)
+df1 <- df1 %>% rename(PROVINCIA = Provincia)
+df1 <- df1 %>% rename(MUNICIPIO = Municipio)
+df1 <- df1 %>% rename(LOCALIDAD = Localidad)
+df1 <- df1 %>% rename(RECINTO = Recinto)
+df1 <- df1 %>% rename(TOTAL_INSCRITOS = INSCRITOS)
+df1 <- df1 %>% rename(VOTOS_VALIDOS = VALIDOS)
+df1 <- df1 %>% rename(CC = cc_prop)
+df1 <- df1 %>% rename(MAS = mas_prop)
+df1 <- df1 %>% rename(PDC = pdc_prop)
+df1 <- df1 %>% rename(P21F = p21f_prop)
+df1 <- df1 %>% rename(RESTO = resto_prop)
+df1 <- df1 %>% rename(ÍNDICE_CONCENTRACION = conc)
+df1 <- df1 %>% rename(ÍNDICE_FRAGMENTACIÓN = frag)
+df1 <- df1 %>% rename(ÍNDICE_NEP = nep)
+df1 <- df1 %>% rename(ÍNDICE_NP = np)
+df1 <- df1 %>% rename(ÍNDICE_I = hi)
+
+DT::datatable(df1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
