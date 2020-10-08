@@ -1,0 +1,153 @@
+---
+title: "RECINTOS QUE PRESENTARON ANOMALÍAS"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: scroll
+    theme: simplex
+---
+
+```{r setup, include=FALSE}
+# Se habilitan las librerías necesarias
+library(flexdashboard)
+library(dplyr)
+# Directorio de trabajo
+load("D:/ARU/PPI USAID/_in/20oct_v2020.RData")
+```
+
+Page 1
+===================================== 
+
+### __Diferencias entre la sumatoria de los votos de las candidaturas y los votos válidos a nivel de departamentos y recintos en Bolivia__
+
+A nivel de departamentos y recintos se pueden observar diferencias negativas y positivas.
+
+Diferencias negativas implican votos ausentes, es decir, se suprimieron votos en las actas finales de un(os) determinado(s) candidato(s) a la presidencia. Por el contrario, diferencias positivas demuestran que se inflaron los votos en un determinado recinto para un(os) determinado(s) candidato(s).
+
+```{r}
+bd_computo <- pcomp %>% filter(dpais == "Bolivia") %>% group_by(ddep, drec) %>% 
+  summarise(CC = sum(cc), MAS =sum(mas), PDC = sum(pdc), P21F = sum(f21),
+            RESTO = sum(fpv, mts, ucs, mnr, panbol), 
+            TOTAL = sum(cc, mas, pdc, f21, fpv, mts, ucs, mnr, panbol),
+            VALIDOS = sum(val))
+
+bd_computo <- bd_computo %>% mutate(DIFERENCIA = TOTAL - VALIDOS)
+bd_computo <- bd_computo %>% rename(DEPARTAMENTO = ddep, RECINTO = drec)
+bd_computo <- bd_computo %>% filter(DIFERENCIA != 0)
+
+DT::datatable(bd_computo, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+Page 2
+===================================== 
+
+### __Diferencias entre la sumatoria de votos de las candidaturas y los votos válidos a nivel de países y recintos__
+
+```{r}
+bd_computo <- pcomp %>% filter(dpais != "Bolivia") %>% group_by(dpais, drec) %>% 
+  summarise(CC = sum(cc), MAS = sum(mas), PDC = sum(pdc), P21F = sum(f21),
+            RESTO = sum(fpv, mts, ucs, mnr, panbol),
+            TOTAL = sum(cc, mas, pdc, f21, fpv, mts, ucs, mnr, panbol),
+            VALIDOS = sum(val))
+
+bd_computo <- bd_computo %>% mutate(DIFERENCIA = TOTAL - VALIDOS)
+bd_computo <- bd_computo %>% rename(PAIS = dpais, RECINTO = drec)
+bd_computo <- bd_computo %>% filter(DIFERENCIA < 0)
+
+DT::datatable(bd_computo, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+```
+
+Page 3
+===================================== 
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+__Recintos donde los votos válidos son iguales a la sumatoria de las candidaturas__
+
+### __DISTRIBUCIÓN ANTES DEL CORTE DEL TREP__
+
+```{r}
+bd_aparo <- bdaparo %>% filter(dpais == "Bolivia") %>% group_by(ddep, drec) %>% 
+  summarise(CC1 = sum(cc), MAS1 = sum(mas), PDC1 = sum(pdc), P21F1 = sum(f21),
+            RESTO1 = sum(fpv, mts, ucs, mnr, panbol),
+            TOTAL1 = sum(cc, mas, pdc, f21, fpv, mts, ucs, mnr, panbol),
+            VALIDOS1 = sum(val))
+
+# Se efectúan pruebas para aquellas mesas dónde TOTAL == VALIDOS (sin anomalía contable)
+
+bd_aparo1 <- bd_aparo %>% filter(TOTAL1 == VALIDOS1)
+bd_aparo1[, 3:7] <- round(prop.table(as.matrix(bd_aparo1[, 3:7]),1)*100,2)
+
+bd_dparo <- bdparo %>% filter(dpais == "Bolivia") %>% group_by(ddep, drec) %>% 
+  summarise(CC2 = sum(cc), MAS2 = sum(mas), PDC2 = sum(pdc), P21F2 = sum(f21),
+            RESTO2 = sum(fpv, mts, ucs, mnr, panbol),
+            TOTAL2 = sum(cc, mas, pdc, f21, fpv, mts, ucs, mnr, panbol),
+            VALIDOS2 = sum(val))
+bd_dparo1 <- bd_dparo %>% filter(TOTAL2 == VALIDOS2)
+bd_dparo1[, 3:7] <- round(prop.table(as.matrix(bd_dparo1[, 3:7]),1)*100,2)
+
+# PRUEBA con CC: candidato perjudicado según diversas fuentes
+
+anomala <- inner_join(bd_aparo1, bd_dparo1, by = "drec")
+anomala <- anomala %>% mutate(num = ((CC1/100) - (CC2/100)))
+anomala <- anomala %>% mutate(den = sqrt((((CC1/100)*(1-(CC1/100)))/TOTAL1) + (((CC2/100)*(1-(CC2/100)))/TOTAL2)))
+anomala <- anomala %>% mutate(zt = num / den)
+anomala <- anomala %>% mutate(keep = if_else(zt > 1.96, T, F))
+anomala <- anomala %>% filter(keep == T)
+
+bd1 <- anomala %>% select(ddep.x, drec, CC1, MAS1, PDC1, P21F1, RESTO1)
+bd1 <- bd1 %>% rename(DPTO = ddep.x, RECINTO = drec, CC = CC1, MAS = MAS1, 
+                      PDC = PDC1, P21F = P21F1, RESTO = RESTO1)
+bd2 <- anomala %>% select(ddep.x, drec, CC2, MAS2, PDC2, P21F2, RESTO2)
+bd2 <- bd2 %>% rename(DPTO = ddep.x, RECINTO = drec, CC = CC2, MAS = MAS2, 
+                      PDC = PDC2, P21F = P21F2, RESTO = RESTO2)
+
+DT::datatable(bd1, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+
+```
+
+Column {data-width=500}
+-----------------------------------------------------------------------
+
+__Recintos donde los votos válidos son iguales a la sumatoria de las candidaturas__
+
+### __DISTRIBUCIÓN DESPUÉS DEL CORTE DEL TREP__
+
+```{r}
+DT::datatable(bd2, style = "bootstrap", fillContainer = T, 
+              options = list(pageLength = 15, 
+                             autoWidth = TRUE,
+                             dom = 'Bfrtip',
+                             buttons = c('copy', 
+                                         'print'),
+                             scrollX = T, 
+                             selection="multiple"
+              ))
+```
+
