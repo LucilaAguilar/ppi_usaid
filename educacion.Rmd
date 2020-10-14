@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     
     navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}   
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -49,9 +50,7 @@ db1 <- db %>% filter(year >= 2011)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__NÚMERO DE ESTUDIANTES MATRICULADOS, SEGÚN NIVEL DE ESCOLARIDAD__
+### __SERIE HISTÓRICA__ <br> __Número de estudiantes matriculados, según nivel de escolaridad__
 
 ```{r}
 
@@ -90,9 +89,7 @@ __Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__TASA NETA DE MATRICULACIÓN, SEGÚN NIVEL DE ESCOLARIDAD__
+### __SERIE HISTÓRICA__ <br> __Tasa neta de matriculación, según nivel de escolaridad__
 
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = net_mat, group = primaria, 
@@ -142,9 +139,7 @@ __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educ
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__TASA DE ABANDONO ESCOLAR, SEGÚN NIVEL DE ESCOLARIDAD__
+### __SERIE HISTÓRICA__ <br> __Tasa de abandono escolar, según nivel de escolaridad__
 
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = abandono, group = primaria, 
@@ -193,9 +188,7 @@ __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educ
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__GASTO EN EDUCACIÓN, COMO PORCENTAJE DEL PIB__
+### __SERIE HISTÓRICA__ <br> __Gasto en educación, como porcentaje del PIB__
 
 ```{r}
 g4 <- ggplot(data = na.omit(db2), aes(x = year, y = gasto_edu_pib, 
@@ -244,9 +237,7 @@ __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educ
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__TASA DE MATRICULACIÓN BRUTA, EDUCACIÓN TERCIARIA__
+### __SERIE HISTÓRICA__ <br> __Tasa de matriculación bruta, educación terciaria__
 
 ```{r}
 g5 <- ggplot(data = na.omit(db2), aes(x = year, y = educ_terc_raw, 

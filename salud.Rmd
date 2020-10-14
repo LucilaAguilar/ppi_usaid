@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     
     navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -43,9 +44,7 @@ load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/salud.RData"
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__NÚMERO DE ESTABLECIMIENTOS DE SALUD__
+### __SERIE HISTÓRICA__ <br> __Número de establecimientos de salud__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = construccion, fill = level,  
@@ -92,9 +91,7 @@ __Fuente de datos:__ Servicio Nacional de Información en Salud (SNIS).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__PORCENTAJE DE PERSONAS QUE CUENTAN \N CON SEGURO DE SALUD__
+### __SERIE HISTÓRICA__ <br> __Porcentaje de personas que cuentan con seguro de salud__
 
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = seguro,  
@@ -141,9 +138,7 @@ __Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de 
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__TASA DE MORTALIDAD, MENORES DE 5 AÑOS (POR CADA 1.000)__
+### __SERIE HISTÓRICA__ <br> __Tasa de mortalidad, menores de 5 años (por cada 1.000)__
 
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = mort_inf, 
@@ -192,9 +187,7 @@ __Referencia bibliográfica:__ Organización Mundial de la Salud (OMS).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__PREVALENCIA DE ANEMIA EN LA INFANCIA (% DE MENORES DE 5 AÑOS)__
+### __SERIE HISTÓRICA__ <br> __Prevalencia de anemia en la infancia (% de menores de 5 años)__
 
 ```{r}
 g4 <- ggplot(data = db2, aes(x = year, y = prev_anemia, 
@@ -243,9 +236,7 @@ __Referencia bibliográfica:__ Banco Mundial (BM).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__  
-
-__MADRES ADOLESCENTES (% DE MUJERES ENTRE 15 Y 19 AÑOS QUE TUVIERON HIJOS O SE ENCUENTRAN EMBARAZADAS)__
+### __SERIE HISTÓRICA__  <br> __Madres adolescentes (% de mujeres entre 15 y 19 años que tuvieron hijos o se encuentran embarazadas)__
 
 ```{r}
 db2$year <- as.character(db2$year)

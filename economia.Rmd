@@ -4,6 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     
     navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left} 
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -43,9 +44,7 @@ load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/economia.RDa
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__CRECIMIENTO ECONÓMICO__
+### __SERIE HISTÓRICA__ <br> __Evolución del crecimiento económico__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = pib, 
@@ -94,9 +93,7 @@ __Referencia bibliográfica:__ Fondo Monetario Internacional (FMI).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__EVOLUCIÓN DEL SALDO COMERCIAL__
+### __SERIE HISTÓRICA__ <br> __Evolución del saldo comercial__
 
 ```{r}
 g2 <- ggplot(data = db, aes(x = year, y = comercial/1000,  
@@ -146,9 +143,7 @@ __Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
 Column {data-width=600}
 -----------------------------------------------------------------------
     
-### __SERIE HISTÓRICA__
-
-__EVOLUCIÓN DE LA INVERSIÓN PÚBLICA__
+### __SERIE HISTÓRICA__ <br> __Evolución de la inversión pública__
 
 ```{r}
 g3 <- ggplot(data = na.omit(db), aes(x = year, y = inversion/1000,  
@@ -188,9 +183,7 @@ __Referencia bibliográfica:__ Instituto Nacional de Estadística.
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__EVOLUCIÓN DEL DÉFICIT/SUPERÁVIT FISCAL, COMO PORCENTAJE DEL PIB__
+### __SERIE HISTÓRICA__ <br> __Evolución del déficit/superávit fiscal, como porcentaje del PIB__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = fiscal, 
@@ -236,9 +229,7 @@ __Referencia bibliográfica:__ Banco Mundial(BM) e Instituto Nacional de Estadí
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__VARIACIÓN PORCENTUAL ACUMULADA DEL ÍNDICE DE PRECIOS AL CONSUMIDOR__
+### __SERIE HISTÓRICA__ <br> __Variación porcentual acumulada del Índice de Precios al Consumidor__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = ipc, 

@@ -3,6 +3,7 @@ title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
     navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}    
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -52,9 +53,7 @@ db5 <- db %>% filter(year>=2008 & year <= 2018)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__Hogares con un adecuado manejo de disposición de residuos sólidos__
+### __SERIE HISTÓRICA__ <br> __Hogares con un adecuado manejo de disposición de residuos sólidos__
 
 ```{r}
 db1$year <- as.character(db1$year)
@@ -105,9 +104,7 @@ __Referencia bibliográfica__ Indicadores de progreso de los Objetivos de Desarr
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__Número de emisiones totales de C02 pér cápita__
+### __SERIE HISTÓRICA__ <br> __Número de emisiones totales de C02 pér cápita__
 
 ```{r}
 g2 <- ggplot(data = db2, aes(x = year, y = emisiones, 
@@ -157,9 +154,7 @@ __Referencia bibliográfica__ Cepalstat
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__Pérdida de cobertura arbórea anual__
+### __SERIE HISTÓRICA__ <br> __Pérdida de cobertura arbórea anual__
 
 ```{r}
 g3 <- ggplot(data = db3, aes(x = year, y = deforestacion, 
@@ -211,9 +206,7 @@ __Referencia bibliográfica:__ World Resources Institute
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__Porcentaje de áreas protegidas respecto a al superficie total del país__
+### __SERIE HISTÓRICA__ <br> __Porcentaje de áreas protegidas respecto a al superficie total del país__
 
 ```{r}
 db4$year <- as.character(db4$year)
@@ -263,9 +256,7 @@ __Referencia bibliográfica__ Cepalstat
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__
-
-__Consumo de agua potable total__
+### __SERIE HISTÓRICA__ <br> __Consumo de agua potable total__
 
 ```{r}
 g5 <- ggplot(data = db5, aes(x = year, y = agua, 
