@@ -1,0 +1,275 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(scales)
+
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/justicia.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_justicia.xlsx", range = "A1:C13", sheet = #"Hoja1", col_names = T), stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_justicia.xlsx", range = "A1:E103", sheet #= "Hoja2", col_names = T), stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_justicia.xlsx", range = "A1:B9", sheet = #"Hoja3", col_names = T), stringsAsFactor = T)
+```
+
+# Acceso a justicia {data-navmenu="Administración de justicia" data-icon="fa-list"}
+
+Column {data-width=600, data-height=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Igualdad de oportunidades de acceso a la justicia__
+
+```{r, fig.height=30}
+g1 <- ggplot(data = db, aes(x = as.character(year), y = acceso_justicia, fill = option, text = paste("Año: ", year, "<br>Porcentaje: ", format(round(acceso_justicia, 1), nsmall = 1), "%" ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_y_continuous(labels = percent) +
+  scale_x_discrete(limits = c("2000", "2007", "2016")) + theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Opciones </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Igualdad de oportunidades de acceso a la justicia.
+
+__Definición:__ Percepción de la igualdad de oportunidades respecto al acceso a la justicia en un determinado periodo.
+
+__Metodología de cálculo:__
+
+$$ IOAJ_t = \dfrac{P(OP)_t}{PT_t}*100 \quad con \quad OP = \{w, x, y, z\} $$
+
+Donde:
+
+- $IOAJ_t$: Igualdad de oportunidades de acceso a la justicia en un periodo $t$.
+
+- $P(OP)_t$: Población de la muestra que: $w$ = no contesta, $x$ = no sabe, $y$ = no tienen iguales oportunidades o $z$ = tienen iguales oportunidades en el acceso a justicia durante un periodo $t$.
+
+- $PT_t$: Población total en la muestra en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, existe un $w$\% o $x$\% personas que no contestan o no saben como responder al tema de acceso a justicia y, por otra parte, existe un $y$\% o $z$\% de personas que perciben que NO se tiene, o se tiene, un acceso a la justicia en igualdad de oportunidades, respectivamente.
+
+__Nivel de desagregación:__ Muestral con cobertura en los 9 departamentos de Bolivia.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Latinobarómetro.
+
+__Referencia bibliográfica:__ Latinobarómetro.
+
+# Confianza en el poder judicial {data-navmenu="Administración de justicia" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Confianza en el poder judicial__
+
+```{r}
+g1 <- ggplot(data = db1, aes(x = as.character(year), y = conf_poder_judicial, fill = option, text = paste("Año: ", year, "<br>Porcentaje: ", format(round(conf_poder_judicial, 1), nsmall = 1), "%" ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_y_continuous(labels = percent) +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2013", "2015", "2016", "2017", "2018")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Nivel de confianza en el poder judicial.
+
+__Definición:__ Nivel de confianza que reportan tener las personas en el poder judicial boliviano.
+
+__Metodología de cálculo:__
+
+$$ CPJ_t = \dfrac{P(OP)_t}{PT_t}*100 \quad con \quad OP = \{u, v, w, x, y, z\} $$
+
+Donde:
+
+- $CPJ_{t}$: Nivel de confianza en el poder judicial en el periodo $t$.
+
+- $P(OP)_t$: Población de la muestra que: $u$ = tiene algo confianza, $v$ = tiene mucha confianza, $w$ = no tiene confianza, $x$ = no contestan, $y$ = no saben o $z$ = tiene poca confianza en el poder judicial, en el periodo $t$.
+
+- $PT_t$: Población total en la muestra en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En el año $t$ existe un $u$\%, $v$\% y $z$\% de personas que tienen algo, mucha o poca confianza en el poder judicial boliviano, respectivamente y, por otra parte, existe un $w$\%, $x$\% e $y$\% de personas que NO tienen confianza en el poder judicial, no contestan o no saben, respectivamente.
+
+__Nivel de desagregación:__ Muestral con cobertura en los 9 departamentos de Bolivia.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Latinobarómetro.
+
+__Referencia bibliográfica:__ Latinobarómetro.
+
+# Confianza en la policía {data-navmenu="Administración de justicia" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Confianza en la policía__
+
+```{r}
+g1 <- ggplot(data = db1, aes(x = as.character(year), y = conf_policia, fill = option, text = paste("Año: ", year, "<br>Porcentaje: ", format(round(conf_policia, 1), nsmall = 1), "%" ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_y_continuous(labels = percent) +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2003", "2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2013", "2015", "2016", "2017", "2018")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Nivel de confianza en la policía.
+
+__Definición:__ Nivel de confianza que reportan tener las personas en la policía boliviana.
+
+__Metodología de cálculo:__
+
+$$ CP_t = \dfrac{P(OP)_t}{PT_t}*100 \quad con \quad OP = \{u, v, w, x, y, z\} $$
+
+Donde:
+
+- $CP_{t}$: Nivel de confianza en la policía en el periodo $t$.
+
+- $P(OP)_t$: Población de la muestra que: $u$ = tiene algo confianza, $v$ = tiene mucha confianza, $w$ = no tiene confianza, $x$ = no contestan, $y$ = no saben o $z$ = tiene poca confianza en la policía, en el periodo $t$.
+
+- $PT_t$: Población total en la muestra en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En el año $t$ existe un $u$\%, $v$\% y $z$\% de personas que tienen algo, mucha o poca confianza en la policía boliviana, respectivamente y, por otra parte, existe un $w$\%, $x$\% e $y$\% de personas que NO tienen confianza en la policía boliviana, no contestan o no saben, respectivamente.
+
+__Nivel de desagregación:__ Muestral con cobertura en los 9 departamentos de Bolivia.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Latinobarómetro.
+
+__Referencia bibliográfica:__ Latinobarómetro.
+
+# Confianza en la ONU {data-navmenu="Administración de justicia" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Confianza en la Organización De Las Naciones Unidas__
+
+```{r}
+db1 <- db1 %>%filter(year > 2015 & option != "No contesta")
+g1 <- ggplot(data = db1, aes(x = as.character(year), y = conf_onu, fill = option, text = paste("Año: ", year, "<br>Porcentaje: ", format(round(conf_onu, 1), nsmall = 1), "%" ))) + 
+  geom_bar(stat = "identity", position = "fill") +
+  scale_y_continuous(labels = percent) +
+  scale_x_discrete(limits = c("2016", "2017", "2018")) + theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Opciones </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Nivel de confianza en la Organización de las Naciones Unidas (ONU).
+
+__Definición:__ Nivel de confianza que reportan tener las personas en la Organización de las Naciones Unidas (ONU).
+
+__Metodología de cálculo:__
+
+$$ CONU_t = \dfrac{P(OP)_t}{PT_t}*100 \quad con \quad OP = \{v, w, x, y, z\} $$
+
+Donde:
+
+- $CONU_{t}$: Nivel de confianza en la Organización de las Naciones Unidas en el periodo $t$.
+
+- $P(OP)_t$: Población de la muestra que: $v$ = tiene algo confianza, $w$ = tiene mucha confianza, $x$ = no tiene confianza, $y$ = no saben o $z$ = tiene poca confianza en la ONU, en el periodo $t$.
+
+- $PT_t$: Población total en la muestra en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En el año $t$ existe un $v$\%, $w$\% y $z$\% de personas que tienen algo, mucha o poca confianza en la Organización de Naciones Unidas, respectivamente y, por otra parte, existe un $x$\% e $y$\% de personas que NO tienen confianza en la Organización de Naciones Unidas o no saben, respectivamente.
+
+__Nivel de desagregación:__ Muestral con cobertura en los 9 departamentos de Bolivia.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Latinobarómetro.
+
+__Referencia bibliográfica:__ Latinobarómetro.
+
+# Corrupción {data-navmenu="Administración de justicia" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Índice de percepción de la sociedad a la corrupción__
+
+```{r}
+g1 <- ggplot(data = db2, aes(x = year, y = indice, text = paste("Año: ", year, "<br>Valor: ", format(round(indice, 1), nsmall = 1) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) + 
+  scale_x_discrete(limits = c(2012:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Opciones </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Índice de percepción de la sociedad a la corrupción.
+
+__Definición:__ Es un índice compuesto, comprende una combinación de diferentes encuestas y evaluaciones internacionales de la corrupción, recopiladas por una variedad de instituciones acreditadas. El índice se basa en 13 encuestas de instituciones independientes especializadas en gobernanza y análisis del clima empresarial que abarcan evaluaciones de expertos y opiniones de empresarios.
+
+__Metodología de cálculo:__ Composición de acuerdo a diversas fuentes de información. Para una mejor comprensión de la estructuración del índice revisar:
+
+- https://web.archive.org/web/20101028034533/http://www.transparency.org/news_room/in_focus/2007/cpi2007
+
+- https://www.transparency.org/files/content/pressrelease/2012_CPITechnicalMethodologyNote_EMBARGO_EN.pdf
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ El índice asigna sus puntuaciones de acuerdo con una escala de 0 (corrupción elevada) a 100 (transparencia elevada).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Transparency International.
+
+__Referencia bibliográfica:__ Transparency International.
+

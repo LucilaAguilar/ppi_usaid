@@ -1,0 +1,235 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(scales)
+library(stringr)
+library(tidyverse)
+library(reshape2)
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/bonos.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_bonos.xlsx", range = "A1:O14", sheet = #"Hoja1", col_names = T), stringsAsFactor = T)
+```
+
+# Bono Juancito Pinto {data-navmenu="Bonos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de beneficiarios del Bono Juancito Pinto__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = jpinto, text = paste("Año: ", year, "<br>Número de <br>beneficiarios: ", format(round(jpinto, 0), nsmall = 0), "niños(as)/ <br>adolescentes" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2006:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de beneficiarios", fill = "")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Beneficiarios del bono Juancito Pinto.
+
+__Definición:__ Número de beneficiarios (estudiantes que se encuentran matriculados y cursando el Nivel de Educación Primaria Comunitaria Vocacional o el Nivel de Educación Secundaria Comunitaria Productiva, en las Unidades Educativas Fiscales y de Convenio, en todo el Estado Plurinacional de Bolivia, que correspondan al Subsistema de Educación Regular o estudiantes con Discapacidad, matriculados en modalidad directa de Centros de Educación Especial Fiscales y de Convenio y Estudiantes del “Programa de Educación Sociocomunitaria en Casa para Personas con Discapacidad” prohibiéndose cobrar este beneficio en dos o más instituciones educativas simultáneamente) del bono Juancito Pinto en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de beneficiarios del bono Juancito Pinto fue de $x$ niños/as adolescentes.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis y Políticas Sociales y Económicas (UDAPE), Ministerio de Educación.
+
+__Referencia bibliográfica:__ Ministerio de Educación, Deportes y Cultura.
+
+# Bono Juana Azurduy {data-navmenu="Bonos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de beneficiarios del Bono Juana Azurduy__
+
+```{r}
+db1 <-  melt(db, id.vars = "year", measure.vars = c("jazurduy_nn", "jazurduy_mm"), variable.name = "madre", value.name = "beneficiario")
+db1$madre <- if_else(db1$madre == "jazurduy_mm", "Madre", "Niño(a)")
+g1 <- ggplot(data = na.omit(db1), aes(x = year, y = beneficiario, fill = madre, text = paste("Año: ", year, "<br>Número de<br>beneficiarios: ", format(round(beneficiario, 0), nsmall = 0) ))) + 
+  geom_bar(stat = "identity", position = "dodge") +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2009:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de beneficiarios", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Categoría </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Beneficiarios del bono Juana Azurduy.
+
+__Definición:__ Número de beneficiarios (mujeres gestantes condicionado al cumplimiento de 4 controles prenatales, parto institucional y control post parto; niños y niñas menores de dos años condicionado a 12 controles integrales de salud bimensual. En ambos casos no deben contar con seguro de salud) del bono Juana Azurduy en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de beneficiarios del bono Juana Azurduy fue de $x$ e $y$ mujeres gestantes y niños/as, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis y Políticas Sociales y Económicas (UDAPE), Ministerio de Salud.
+
+__Referencia bibliográfica:__ Ministerio de Salud.
+
+# Renta Dignidad {data-navmenu="Bonos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de beneficiarios de la Renta Dignidad__
+
+```{r}
+db1 <-  melt(db, id.vars = "year", measure.vars = c("rdignidad_rent", "rdignidad_norent"), variable.name = "rentista", value.name = "beneficiario")
+db1$rentista <- if_else(db1$rentista == "rdignidad_rent", "Rentista", "No rentista")
+g1 <- ggplot(data = na.omit(db1), aes(x = year, y = beneficiario, fill = rentista, text = paste("Año: ", year, "<br>Número de<br>beneficiarios: ", format(round(beneficiario, 0), nsmall = 0), "adultos<br>mayores" ))) + 
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2009:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de beneficiarios", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Categoría </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Beneficiarios de la Renta Dignidad.
+
+__Definición:__ Número de beneficiarios (personas de 60 años o más, residentes en el país, que no cobran un sueldo del sector público) de la Renta Dignidad en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de beneficiarios de la Renta Dignidad fue de $x$ e $y$ rentistas y no rentistas, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Autoridad de Fiscalizacion y Control de Pensiones y Seguros (APS).
+
+__Referencia bibliográfica:__ Autoridad de Fiscalizacion y Control de Pensiones y Seguros (APS).
+
+# Renta Solidaria {data-navmenu="Bonos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de beneficiarios de la Renta Solidaria__
+
+```{r}
+db1 <- db %>% select(year, rsolidaria)
+g1 <- ggplot(data = na.omit(db1), aes(x = year, y = rsolidaria, text = paste("Año: ", year, "<br>Número de<br>beneficiarios: ", format(round(rsolidaria, 0), nsmall = 0), "personas<br>discapacitas" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2012:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de beneficiarios", fill = "")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Beneficiarios de la Renta Solidaria.
+
+__Definición:__ Número de beneficiarios (personas con discapacidad grave y muy grave) de la Renta Dignidad en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de beneficiarios de la Renta Dignidad fue de $x$ personas con discapacidad grave y muy grave.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis y Políticas Sociales y Económicas (UDAPE), Ministerio de Salud.
+
+__Referencia bibliográfica:__ Ministerio de Salud.
+
+# Subsidio Prenatal {data-navmenu="Bonos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de beneficiarios del Subsidio Prenatal Universal por la Vida__
+
+```{r}
+g1 <- ggplot(data = na.omit(db), aes(x = year, y = sprenatal, text = paste("Año: ", year, "<br>Número de<br>beneficiarios: ", format(round(sprenatal, 0), nsmall = 0), "mujeres<br>gestantes" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2015:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de beneficiarias", fill = "")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Beneficiarios del Subsidio Prenatal Universal por la Vida.
+
+__Definición:__ Número de beneficiarios (mujeres gestantes que no están registradas en ningún Ente Gestor del Seguro Social de Corto Plazo) del Subsidio Prenatal Universal por la Vida en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de beneficiarios del Subsidio Prenatal Universal por la Vida fue de $x$ mujeres gestantes.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis y Políticas Sociales y Económicas (UDAPE), Ministerio de Salud.
+
+__Referencia bibliográfica:__ Ministerio de Salud.

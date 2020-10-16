@@ -1,0 +1,235 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(scales)
+library(stringr)
+library(tidyverse)
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/seguridad.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_seguridad.xlsx", range = "A1:C13", sheet = #"Hoja1", col_names = T), stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_seguridad.xlsx", range = "A1:C21", sheet #= "Hoja2", col_names = T), stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_seguridad.xlsx", range = "A1:C101", sheet #= "Hoja3", col_names = T), stringsAsFactor = T)
+#db3 <- as.data.frame(read_excel("data_seguridad.xlsx", range = "A1:C121", sheet #= "Hoja4", col_names = T), stringsAsFactor = T)
+#db4 <- as.data.frame(read_excel("data_seguridad.xlsx", range = "A1:C31", sheet #= "Hoja5", col_names = T), stringsAsFactor = T)
+```
+
+# Corrupción {data-navmenu="Seguridad ciudadana" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Percepción de la corrupción en jueces y magistrados__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = as.character(year), y = corrupcion_jueces_mag, fill = option, text = paste("Año: ", year, "<br>Porcentaje: ", format(round(corrupcion_jueces_mag, 1), nsmall = 1), "%" ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_y_continuous(labels = percent) +
+  scale_x_discrete(limits = c("2016", "2018")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Grupo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Percepción de la corrupción en jueces y magistrados.
+
+__Definición:__ Percepción de la cantidad de jueces y magistrados involucrados en corrupción en un determinado periodo.
+
+__Metodología de cálculo:__
+
+$$ CJM_t = \dfrac{P(OP)_t}{PT_t}*100 \quad con \quad OP = \{u, v, w, x, y, z\} $$
+
+Donde:
+
+- $CJM_t$: Percepción de la corrupción en jueces y magistrados en un periodo $t$.
+
+- $P(OP)_t$: Población de la muestra que piensa que cree que: $u$ = algunos, $v$ = casi todos, $w$ = ninguno o $z$ = todos los jueces y magistrados están involucrados en corrupción o $x$ = no responde, $y$ = no sabe, en el periodo $t$.
+
+- $PT_t$: Población total en la muestra en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En el año $t$ existe un $u$\%, $v$\% $w$\% y $z$\% de personas que creen que algunos, casi todos, ninguno o todos los jueces y magistrdos están involucrados en corrupción, respectivamente y, por otra parte, existe un $x$\% e $y$\% de personas que no responden o no saben, respectivamente.
+
+__Nivel de desagregación:__ Muestral - nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Latinobarómetro.
+
+__Referencia bibliográfica:__ Latinobarómetro.
+
+# Población Penal {data-navmenu="Seguridad ciudadana" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Población penal__
+
+```{r}
+g1 <- ggplot(data = db1, aes(x = year, y = numero, fill = sex, text = paste("Año: ", year, "<br>Número de <br>personas: ", format(round(numero, 0), nsmall = 0) ))) + 
+  geom_bar(stat = "identity", position = "stack") +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2009:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de personas", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Sexo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Población penal, según sexo.
+
+__Definición:__ Distribución de la población que se encuentra en centros penitenciarios en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En el año $t$ existen $x$ e $y$, hombres y mujeres, respectivamente, que se encuentran en centros penitenciarios.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Dirección General de Régimen Penitenciario.
+
+# Seguridad ciudadana {data-navmenu="Seguridad ciudadana" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Servicios de seguridad ciudadana__
+
+```{r}
+g1 <- ggplot(data = db2, aes(x = year, y = valor, fill = str_wrap(option, 30), text = paste("Año: ", year, "<br>Número de <br> servicios: ", format(round(valor, 0), nsmall = 0) ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_y_continuous(labels = comma) + 
+  scale_x_discrete(limits = c(2007:2016), guide = guide_axis(angle = 90)) +  theme_gray() + theme(legend.key.height=unit(1, "cm")) +
+  labs(x = "Años", y = "Número de servicios de seguridad ciudadana", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo de auxilio </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Servicios de seguridad ciudadana, según tipo de auxilio prestado en un determinado periodo.
+
+__Definición:__ Número de servicios de seguridad ciudadana prestados según tipología.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En el año $t$ se registraron $u$, $v$, $w$, $x$, $y$, $z$, $a$, $b$, $c$, $d$ servicios de seguridad ciudadana registrados: Auxilio a personas heridas y/o lesionadas, a heridos, lesionados en accidentes de tránsito, auxilio a personas enfermas, partos atendidos, auxilio a personas extraviadas, rescate de personas, incendios, inundaciones, derrumbes, casos de explosivos, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), PoliCía Boliviana.
+
+# Delitos comunes {data-navmenu="Seguridad ciudadana" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Denuncias de delitos comunes__
+
+```{r}
+g1 <- ggplot(data = db3, aes(x = year, y = numero, fill = str_wrap(tipo,30), text = paste("Año: ", year, "<br>Número de <br>delitos: ", format(round(numero, 0), nsmall = 0) ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_y_continuous(labels = comma) + theme(legend.key.height=unit(1, "cm")) +
+  scale_x_discrete(limits = c(2007:2016)) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo de delito </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Número de denuncias de delitos comunes.
+
+__Definición:__ Número de denuncias de delitos comunes reportados, segpun tipología en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En el año $t$ se registraron $u$, $v$, $w$, $x$, $y$, $z$, $a$, $b$, $c$, $d$ $e$, $f$ delitos contra: honor, enonomía nacional industria o comercio, familia, fe pública, función judicial, función pública, libertad, libertad sexual, propiedad, seguridad común, seguridad del estado y vida integridad y dignidad del ser humano, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Policía Boliviana.
+
+# Narcotráfico {data-navmenu="Seguridad ciudadana" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Cantidad de droga incautada__
+
+```{r}
+g1 <- ggplot(data = db4, aes(x = year, y = valor, fill = tipo, text = paste("Año: ", year, "<br>Valor: ", format(round(valor, 1), nsmall = 1), "kg." ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2009:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "En kilogramos", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo </b>')), xaxis = list(tickangle = 90))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Cantidad de droga incautada.
+
+__Definición:__ Volumen de droga incautada según tipología en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Kilogramos.
+
+__Interpretación:__ En el año $t$ se incautaron $x$, $y$ y $z$ kilogramos de clorhidrato de cocaína, cocaína base y marihuana, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Fuerza Especial de Lucha Contra el Narcotráfico (FELCN).

@@ -1,0 +1,235 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(scales)
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/energia.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_energia.xlsx", range = "A1:F20", sheet = #"Hoja1", col_names = T), stringsAsFactor = T)
+```
+
+# Acceso a la electricidad {data-navmenu="Energía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Acceso a la electricidad (% de población)__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = aelectricidad, text = paste("Año: ", year, "<br>Valor: ", format(round(aelectricidad, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Acceso a la electricidad (% de población).
+
+__Definición:__ Hogares con acceso a servicio eléctrico, expresado como proporción del total de hogares.
+
+__Metodología de cálculo:__
+
+$$AE_t= \dfrac{HSE_t}{TH_t}$$
+
+Donde:
+
+- $AE_t$: Porcentaje de población con acceso a electricidad en un año determinado $t$.
+
+- $HSE_t$: Población con acceso servicio eléctrico en un año determinado $t$.
+
+- $TH_t$: Total de población en un año determinado $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ Para la gestión $t$, el $x$\% de hogares contaban con
+servico eléctrico.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Producción de energía eléctrica renovable {data-navmenu="Energía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Producción de energía eléctrica renovable (% de la producción total de electricidad)__
+
+```{r}
+db1 <- db %>% filter(year < 2016)
+g1 <- ggplot(data = db1, aes(x = year, y = pelectricar, text = paste("Año: ", year, "<br>Valor: ", format(round(pelectricar, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2015)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Producción de energía eléctrica renovable (% de la producción total de electricidad).
+
+__Definición:__ La electricidad renovable es la parte de la electricidad generada por las plantas de energía renovable en la electricidad total generada por todo tipo de plantas.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, el $x$\% de la electricidad total generada era renovable.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Consumo de energía renovable {data-navmenu="Energía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Consumo de energía renovable (% del consumo total de energía final)__
+
+```{r}
+g1 <- ggplot(data = db1, aes(x = year, y = cerenovable, text = paste("Año: ", year, "<br>Valor: ", format(round(cerenovable, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2015)) +  theme_gray() + 
+  labs(x = "Años", y = "En  porcentaje")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Consumo de energía renovable (% del consumo total de energía final).
+
+__Definición:__ El consumo de energía renovable es la participación de la energía renovable en el consumo total de energía final.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, la participación de la energía renovable en el consumo total de energía final era $x$\% .
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Energía nuclear y alternativa {data-navmenu="Energía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Energía nuclear y alternativa (% del total de uso de energía)__
+
+```{r}
+g1 <- ggplot(data = na.omit(db), aes(x = year, y = enuclearya, text = paste("Año: ", year, "<br>Valor: ", format(round(enuclearya, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2014)) +  theme_gray() + 
+  labs(x = "Años", y = "En  porcentaje")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Energía nuclear y alternativa (% del total de uso de energía).
+
+__Definición:__ Es energía no proveniente de hidrocarburos cuya generación no produce dióxido de carbono. Incluye la energía hidroeléctrica y nuclear, la geotérmica y la solar, entre otras.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, el $x$\% del total de uso de energía correspondía a energía nuclear y/o alternativa.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Consumo de energía procedente de combustibles fósiles {data-navmenu="Energía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Consumo de energía procedente de combustibles fósiles (% del total)__
+
+```{r}
+g1 <- ggplot(data = na.omit(db), aes(x = year, y = cefosiles, text = paste("Año: ", year, "<br>Valor: ", format(round(cefosiles, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2014)) +  theme_gray() + 
+  labs(x = "Años", y = "En  porcentaje")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Consumo de energía procedente de combustibles fósiles (% del total).
+
+__Definición:__ El combustible fósil comprende los productos de carbón, aceite, petróleo y gas natural.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, el consumo de energía procedente de combustibles fósiles representaba el $x$\% del total de energía consumida.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
