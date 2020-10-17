@@ -3,7 +3,7 @@ title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
     navbar:
-    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}    
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -17,7 +17,7 @@ editor_options:
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
-library(wordcloud)
+#library(wordcloud)
 library(tm)
 library(dplyr)
 library(ggplot2)
@@ -32,12 +32,13 @@ library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
-
+library(reshape)
+library(scales)
 #db <- as.data.frame(read_excel("D:/ARU/PPI USAID/_data/indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
 #db1 <- db %>% filter(year >= 2011)
 #db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
 #setwd("D:\\ARU_Sergio\\usaid\\_data")
-#db <- as.data.frame(read_excel("data_ambiental.xlsx", range = "A1:F22", col_names = T), stringsAsFactor = T)
+#db <- as.data.frame(read_excel("data_ambiental.xlsx", range = "A1:P22", col_names = T), stringsAsFactor = T)
 #save(db, file = "medioambiente.RData")
 #base de datos
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/medioambiente.RData"))
@@ -46,6 +47,11 @@ db2 <- db %>% filter(year>=2000 & year <= 2016)
 db3 <- db %>% filter(year>=2001)
 db4 <- db %>% filter(year==1990 | year==2000 | year==2014)
 db5 <- db %>% filter(year>=2008 & year <= 2018)
+db6 <- db %>% filter(year>=2000 & year <= 2017)
+db6 <- db6 %>% select(year, renovable_1, renovable_2)
+db7 <- db2 %>% select(year, gas_1, gas_2, gas_3, gas_4, gas_5, gas_6)
+db8 <- db %>% filter(year>=2003 & year <= 2019)
+db9 <- db %>% filter(year>=2000 & year <= 2019)
 ```
 
 # Manejo adecuado de residuos sólidos {data-navmenu="Medio Ambiente" data-icon="fa-list"}
@@ -53,7 +59,7 @@ db5 <- db %>% filter(year>=2008 & year <= 2018)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Hogares con un adecuado manejo de disposición de residuos sólidos__
+### __SERIE HISTÓRICA <br> Hogares con un adecuado manejo de disposición de residuos sólidos__
 
 ```{r}
 db1$year <- as.character(db1$year)
@@ -104,7 +110,7 @@ __Referencia bibliográfica__ Indicadores de progreso de los Objetivos de Desarr
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Número de emisiones totales de C02 pér cápita__
+### __SERIE HISTÓRICA <br> Número de emisiones totales de C02 pér cápita__
 
 ```{r}
 g2 <- ggplot(data = db2, aes(x = year, y = emisiones, 
@@ -154,7 +160,7 @@ __Referencia bibliográfica__ Cepalstat
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Pérdida de cobertura arbórea anual__
+### __SERIE HISTÓRICA <br> Pérdida de cobertura arbórea anual__
 
 ```{r}
 g3 <- ggplot(data = db3, aes(x = year, y = deforestacion, 
@@ -206,7 +212,7 @@ __Referencia bibliográfica:__ World Resources Institute
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Porcentaje de áreas protegidas respecto a al superficie total del país__
+### __SERIE HISTÓRICA <br> Porcentaje de áreas protegidas respecto a al superficie total del país__
 
 ```{r}
 db4$year <- as.character(db4$year)
@@ -256,7 +262,7 @@ __Referencia bibliográfica__ Cepalstat
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Consumo de agua potable total__
+### __SERIE HISTÓRICA <br> Consumo de agua potable total__
 
 ```{r}
 g5 <- ggplot(data = db5, aes(x = year, y = agua, 
@@ -289,7 +295,7 @@ Donde:
 
 __Unidad de medida:__ Miles de metros cúbicos
 
-__Interpretación:__ En el año $t$ se consumio un total de "x" mile sde metros cúbicos de agua potable.
+__Interpretación:__ En el año $t$ se consumio un total de "x" miles de metros cúbicos de agua potable.
 
 __Nivel de desagregación:__ Nacional
 
@@ -298,3 +304,288 @@ __Periodicidad:__ Anual
 __Fuente de datos:__ Instituto Nacional de Estadística (INE)
 
 __Referencia bibliográfica__ Indicadores de progreso de los Objetivos de Desarrollo Sostenible (ODS)
+
+
+
+# Proporción renovable de la oferta energética total {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Proporción renovable de la oferta energética total__
+
+```{r}
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="renovable_1", "Renovable", "No renovable")
+g6 <- ggplot(data = db6_1, aes(x = year, y = value, fill = variable, 
+                             
+                            text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar( stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c(2000:2017)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: CEPALSTAT", fill="")
+ggplotly(g6, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo de energía </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Proporción renovable de la oferta energética total
+
+__Definición:__ Proporción de la oferta energética total que proviene de fuentes renovables. La oferta energética total de energía se compone de la oferta de energía primaria y secundaria disponible para satisfacer las necesidades energéticas del país en procesos de transformación y consumo final. 
+
+La oferta de energía renovable corresponde a la oferta de energía que deriva de procesos naturales que se reponen constantemente, como aquellos que provienen de recursos no fósiles, de bajo contenido de carbono y de periodos de formación relativamente cortos: geotermia, hidroenergía, leña, bioenergía sostenible no relacionada con la madera (productos de caña), carbón de vegetal y otras fuentes como energía eólica y solar.
+
+__Metodología de cálculo:__
+
+$$ PER_{t} =\dfrac{OER_{}(t)}{OET(t)}*100 $$
+
+Donde:
+
+- $PER_{t}$: Proporción renovable de la oferta energética.
+
+- $OER(t)$: Oferta de energía renovable en el año $t$.
+
+- $OET(t)$: Oferta total de energía en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ se tuvo una oferta de "x"\% del total de la oferta energética. 
+
+__Nivel de desagregación:__ Nacional - Por tipo de energía
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadística de la Cepal. Cepalstat
+
+__Referencia bibliográfica:__ Cepalstat
+
+
+
+# Emisiones de gas de efecto invernadero, por sector {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Emisiones de gases de efecto invernadero (GEI)__
+
+```{r}
+db7_1 <- melt(db7, id="year")
+db7_1$variable <- ifelse(db7_1$variable=="gas_1", "Energía", ifelse(db7_1$variable=="gas_2", "Procesos industriales", ifelse(db7_1$variable=="gas_3", "Agricultura", ifelse(db7_1$variable=="gas_4", "Cambio de uso de suelo y silvicultura", ifelse(db7_1$variable=="gas_5", "Desechos", "Combustibles de caldera")))))
+g7 <- ggplot(data = db7_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c(2000:2016)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: CEPALSTAT.", fill = "")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Sector </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Emisiones de gases de efecto invernadero (GEI).
+
+__Definición:__ Emisiones de distintos GEI entre los cuales se incluyen: dióxido de carbono ($C0_2$),óxido nitroso ($N_20$), hidrofluorcarbonos (HFCs), perfluorcarbonos (PFCs) y hexafluoro de azufre ($SF_6$), generados en las actividades de los siguientes sectores: 
+-Energía: Emisiones de $C0_2$, $CH_4$ y $N_20$ de los sub-sectores de Electricidad/calor, manufactura/construcción, transporte, otras combustiones y emisiones fugitivas.
+
+-Procesos industriales: Emisiones de $C0_2$, $CH_4$ y $N_20$ de la producción de cemento, producción de ácido adípico y nítrico y otras industrias, emisiones de gases fluorados (HCFs, PFC y $SF_6$)  
+
+-Agricultura: Emisiones de $CH_4$ y $N_20$ en fermentación entérica, gestión de estiércol, cultivo de rroz, fertilizantes sintéticos, estiércol aplicado a los suelos, estiércol depositado en la pasturas, residuos agrícolas, cultivación de suelos orgánicos, combustión de residuos agrícolas y combustión de la Sabana.
+
+-Cambio de uso de suelo y silvicultura: Emisiones de $C0_2$, $CH_4$ y $N_20$ de tierras forestales, tierras de cultivo, pastizales, combustión de biomasa.
+
+-Desechos: Emisiones de $CH_4$ y $N_20$ de vertederos, tratamiento de aguas residuales, residuos provenientes del humano y otros desechos
+
+-Combustible de caldera: Emisiones de $C0_2$.
+
+Una emisión de un GEI se define como la liberación del mismo y/o de sus precursores a la atmósfera, en una zona y por un periodo determinado.
+
+__Metodología de cálculo:__
+
+$$ EGEI^{b}_{t} =\dfrac{\sum_{i}^{N}GEI^b(t)}{ET(t)}*100 $$
+
+Donde:
+
+- $EGEI^{b}_{t}$: Porcentaje de gases GEI en el año $t$ del sector $b$ respecto al total de emisiones.
+
+- $\sum_{i}^{N}GEI^b(t)$: Sumatoria de los gases GEI del sector $b$ en el año $t$.
+
+- $ET(t)$: Emisiones totales de gases GEI en el año $t$.
+
+- $(b)$: Corresponde al sector b.
+
+Las estimaciones de $C0_2$ provienen de la IEA  las estimaciones de $CH_4$ y $N_2O$ provienen de la EPA.
+
+Las emisiones de gases $CH_4$, $N_2O$ y otros se expresan en $CO_2$ equivalentes (Millones de toneladas de dióxido de carbono ($MtC0_2e$)).
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__  En el año $t$ el sector $b$ generó  "x"\% de gases GEI del total emitidos a la atmósfera. 
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadística de la Cepal. Cepalstat
+
+__Referencia bibliográfica:__ Cepalstat
+
+
+# Parque automotor por habitante {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Número de automóviles por cada 1000 habitantes__
+
+```{r}
+g8 <- ggplot(data = db8, aes(x = year, y = auto, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(auto,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2003:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Automóviles por caa 1000 hab.", caption = "Fuente: INE.")
+ggplotly(g8, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Automóviles por cada 1000 habitantes.
+
+__Definición:__ Total de vehículos en circulación, parque automotor, con respecto a al cantidad de habitantes del país.
+
+El parque automotor incluye todos los vehículos inscritos que existen en un año menos las bajas producidas (vehículos sacaados de circulación). Los vehículos en circulación incluyen los particuales, públicos y de uso oficial de los gobiernos (central, departamental y municipal)
+
+__Metodología de cálculo:__
+
+$$ PAT_{t} =\dfrac{NTV_{}(t)}{POB(t)}*1000 $$
+
+Donde:
+
+- $PAT_{t}$: Número de vehículos por cada 1000 habitantes en el año $t$.
+
+- $NTV_{}(t)$: Número total de vehículos registrados en el año $t$.
+
+- $POB(t)$: Población total en el año $t$.
+
+__Unidad de medida:__ Número de vehículos por cada 1000 habitantes.
+
+__Interpretación:__ En el año $t$ existen "x" vehículos registrados por cada 1000 habitantes.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadística de la Cepal. Cepalstat
+
+__Referencia bibliográfica:__ Cepalstat
+
+
+
+# Empresas con certificación ISO {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Número de empresas con certificación ISO__
+
+```{r}
+g9 <- ggplot(data = db9, aes(x = year, y = gestion, 
+                             text = paste("Año: ", year, "<br>Número: ", round(gestion,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Número de empresas con certificación", caption = "Fuente: Cepalstat")
+ggplotly(g9, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Empresas con certificación ISO
+
+__Definición:__ Empresas privadas y públicas certificadas con ISO 14001. La norma internacional ISO 14001 se aplica a cualquier empresa que pone en práctica un sistema de gestión ambiental, sobre la base del cumplimiento de la legislación nacional y el mejoramiento continuo de su desempeño.
+
+__Metodología de cálculo:__
+
+$$ TEISO_{t} = \sum_{i}^{N}EISO(t)$$
+
+Donde:
+
+- $TEISO_{t}$: Total de empresas con certificaciçon ISO 14001 en el año $t$.
+
+- $\sum_{i}^{N}EISO(t)$: Sumatoria del número de empresas con certificación ISO en el año $t$.
+
+__Unidad de medida:__ Número de empresas
+
+__Interpretación:__ En el año $t$ "x" empresas contaban con certificación ISO.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadística de la Cepal. Cepalstat
+
+__Referencia bibliográfica:__ Cepalstat
+
+```{r}
+setwd("D:\\ARU_Sergio\\usaid\\_data")
+db <- as.data.frame(read_excel("data_incendio.xlsx", range = "A1:D36", col_names = T), stringsAsFactor = T)
+```
+
+
+# Número de alertas de incendio {data-navmenu="Medio Ambiente" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Número de alertas de incendio__
+
+```{r}
+g10 <- ggplot(data = db, aes(x = yearqrt, y = incendio, group=1,
+                             text = paste("Año: ", year, "<br>Número: ", round(incendio,2) ))) + 
+geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_y_continuous(labels = comma) +
+     theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Trimestres", y = "Número de alertas", caption = "Fuente: Global Forest Watch.")
+ggplotly(g10, tooltip = "text")
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__ 
+
+__Nombre del indicador:__ Número de alertas de incendio
+
+__Definición:__ Número de incendios detectados en el territorio nacional detectados por el sensor Conjunto de Radiometros deImágenes Infrarrojas Visibles (VIIRS) de la NASA.
+
+__Metodología de cálculo:__
+
+$$ NIN_{t} = \sum_{i}^{N}IN_i(t)$$
+
+Donde:
+
+- $NIN_{t}$: Número de incendios otales en el trimestre $t$.
+
+- $\sum_{i}^{N}IN_i(t)$: Sumatoria de los incendios detectados en el día $i$ en el trimestre $t$.
+
+__Unidad de medida:__ Número de alertas de incendios
+
+__Interpretación:__ En el trimestre $t$ se regustraron "x" alertas de incendios
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Global Forest Watch
+
+__Referencia bibliográfica:__ Global Forest Watch - NASA

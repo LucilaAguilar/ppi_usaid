@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     
     navbar:
-    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left} 
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -17,6 +17,7 @@ editor_options:
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
+#library(wordcloud)
 library(tm)
 library(dplyr)
 library(ggplot2)
@@ -24,18 +25,28 @@ library(httr)
 library(plotrix)
 library(shiny)
 library(shinyWidgets)
+library(ggwordcloud)
 library(gridExtra)
 library(ggthemes)
 library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
+library(reshape)
 library(scales)
 # Base de datos
 
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/economia.RData"))
 #setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-#db <- as.data.frame(read_excel("data_economics.xlsx", range = "A1:H11", col_names = T), stringsAsFactor = T)
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_economics.xlsx", range = "A1:H11",  sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_economics.xlsx", range = "A1:K21",  sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+
+#save(db, db1, file = "economia.RData")
+
+db2 <- db1 %>% select(year, deuda_2, deuda_3, deuda_4, deuda_5)
+db3 <- db1 %>% select(year, export_1, export_2)
+
 
 ```
 
@@ -44,7 +55,7 @@ load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/economia.RDa
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Evolución del crecimiento económico__
+### __SERIE HISTÓRICA <br> Crecimiento económico__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = pib, 
@@ -93,7 +104,7 @@ __Referencia bibliográfica:__ Fondo Monetario Internacional (FMI).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Evolución del saldo comercial__
+### __SERIE HISTÓRICA <br> Evolución del saldo comercialL__
 
 ```{r}
 g2 <- ggplot(data = db, aes(x = year, y = comercial/1000,  
@@ -143,7 +154,7 @@ __Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
 Column {data-width=600}
 -----------------------------------------------------------------------
     
-### __SERIE HISTÓRICA__ <br> __Evolución de la inversión pública__
+### __SERIE HISTÓRICA <br> Evolución de la inversión pública__
 
 ```{r}
 g3 <- ggplot(data = na.omit(db), aes(x = year, y = inversion/1000,  
@@ -183,7 +194,7 @@ __Referencia bibliográfica:__ Instituto Nacional de Estadística.
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Evolución del déficit/superávit fiscal, como porcentaje del PIB__
+### __SERIE HISTÓRICA <br> Evolución del déficit/superavit fiscal, como porcentaje de PIB__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = fiscal, 
@@ -229,7 +240,7 @@ __Referencia bibliográfica:__ Banco Mundial(BM) e Instituto Nacional de Estadí
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Variación porcentual acumulada del Índice de Precios al Consumidor__
+### __SERIE HISTÓRICA <br> Variación porcentual acumulada del Índice de precios al consumidor__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = ipc, 
@@ -271,3 +282,254 @@ __Periodicidad:__ Anual.
 __Fuente de datos:__ Instituto Nacional de Estadística (INE).
 
 __Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+
+
+
+# Reservas Internacionales (RIN) ($us a precios actuales) {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Reservas Internacionales (RIN) ($us a precios actuales)__
+
+```{r}
+g6 <- ggplot(data = db1, aes(x = year, y = rin, group=1,  
+                             text = paste("Año: ", year, "<br>Valor: ", round(rin,0) ))) + 
+geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_y_continuous(labels = comma) +
+   scale_x_discrete(limits = c(2000:2019)) + theme_gray() + 
+  labs(x = "Años", y = "Reservas internacionales (en millones de $us)", fill = "Reservas")
+ggplotly(g6, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Reservas Internacionales (RIN)
+
+__Definición:__ Total de reservas, incluyendo oro monetario, derechos esociales de giro, reservas de los miembros del FMI que mantiene el FMI, y tenencias de divisas bajo el control de autoridades monetarias. El componente de oro de estas reservas se valoras a los precios de fin de año.
+
+__Metodología de cálculo:__ No aplica
+
+__Unidad de medida:__ $us a precios actuales
+
+__Interpretación:__ En el año $t$ el país poseía un monto igual a "x" millones de dólares en reservas internacionales.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial.
+
+__Referencia bibliográfica:__ Banco Mundial.
+
+
+# Deuda externa de mediano y largo plazo {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Saldo de la deuda externa de mediano y largo plazo, según acreedor__
+
+```{r}
+db2_1 <- melt(db2, id="year")
+db2_1$variable <- ifelse(db2_1$variable=="deuda_2", "Multilateral", ifelse(db2_1$variable=="deuda_3", "Bilateral", ifelse(db2_1$variable=="deuda_4", "Privado", "FMI")))
+g7 <- ggplot(data = db2_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_x_discrete(limits = c(2002:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Millones de $us", caption = "Fuente: Banco Central de Bolivia.", fill = "")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Acreedor </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Saldo de la deuda externa de mediano y largo plazo, según acreedor
+
+__Definición:__ Saldo total de obligaciones contractales directas a plazo fijo del gobierno a otros pendientes en una fecha determinada. Como la deuda es un saldo, se mide a una fecha determinada,que corresponde al saldo del último día de la anterior gestión.
+
+__Metodología de cálculo:__
+
+$$ SDE(t) = \sum_{i}^{N}DE_{i}(t) $$
+Donde:
+
+- $SDE(t)t$: Saldo de deuda externa en el año $t$.
+
+- $DE_{i}(t)$: Saldo de deuda externa con el acreedor $i$ en el año $t$.
+
+- $i$: Acreedor que incluye: Multilateral, bilateral, privados, FMI.
+
+__Unidad de medida:__ Millones de $us
+
+__Interpretación:__ En el año $t$ el país tenía una deuda de "x" millones de dólares con el acreedor $i$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Bancon Central de Bolivia
+
+__Referencia bibliográfica:__ Banco Mundial
+
+# Exportaciones, según tipo de producto {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Exportaciones según tipo de producto__
+
+```{r}
+db3_1 <- melt(db3, id="year")
+db3_1$variable <- ifelse(db3_1$variable=="export_1", "No tradicionales", "Tradicionales")
+g8 <- ggplot(data = db3_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Millones de $us", caption = "Fuente: INE.", color = "")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Producto </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Exportaciones según tipo de producto
+
+__Definición:__ Valor de todos los bienes y servicios de mercado prestados al resto del mundo de acuerdo al tipo de producto que se exporta:
+
+Exportaciones tradicionales: Minerales (Metales con materia prima importada, estaño, zinc, wólfra, antimonio, plomo, oro, plata y tros minerales) e hidrocarburos (gas natural y otros hidrocarburos).
+
+Exportaciones no tradicionales: Ganado vacuno, castaña, café, cacao, azúcar, bebidas, gomas, cueros, maderas, algodón, soya, joyería y otros productos.
+
+__Metodología de cálculo:__
+
+$$ EXP_{g}(t) = \sum_{i}^{N}VE_{i}(t) $$
+Donde:
+
+- $EXP_{g}(t)$: Valor de las exportaciones $g$ en el año $t$.
+
+- $\sum_{i}^{N}VE_{i}(t)$: Sumatoria del valor de las exportaciones pertenecientes a las exportaciones $g$ en el año $t$.
+
+- $g$: Exportaciones no tradicionales, exportaciones tradicionales.
+
+__Unidad de medida:__ Millones de $us.
+
+__Interpretación:__ En el año $t$ se exportó un valor de "x" millones de dólares de las exportaciones $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica:__ Banco Mundial
+
+
+
+# Inversión extranjera directa neta {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Inversión extranjera directa neta como % del PIB__
+
+```{r}
+g9 <- ggplot(data = db1, aes(x = year, y = ied, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(ied,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: Banco Mundial.")
+ggplotly(g9, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Inversión extranjera directa como % del PIB
+
+__Definición:__ Entrada neta de inversiones de una empresa que funciona en un país que no es del inversionista. Es la suma del capital accionario, la reinversión de las ganancias, otras formas de capital a largo y corto plazo.
+
+Esta serie refleja el neto , es decir, la inversión extranjera neta en la economía informante proveniente de fuentes extranjeras menos la inversión extranjera directa neta de la economía informante hacia el resto del mundo.
+
+__Metodología de cálculo:__
+
+$$ PIED_t = (\dfrac{IED_t}{PIB_{t}})*100 $$
+Donde:
+
+- $PIED_t$: Inversión Extranjera Directa como \% del PIB en el año $t$.
+
+- $IED_t$: Inversión Extranjera Directa en el año $t$.
+
+- $PIB_{t}$: Producto Interno Bruto en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ la inversión extranjera directa representó UN "x" \% del PIB.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Banco Mundial
+
+__Referencia bibliográfica:__ Banco Mundial
+
+
+
+# Formación bruta de capital {data-navmenu="Economía" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Formación bruta de capital como % del PIB__
+
+```{r}
+g10 <- ggplot(data = db1, aes(x = year, y = fbk, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(fbk,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.")
+ggplotly(g10, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Formación Bruta de Capital
+
+__Definición:__ Comprende los desembolsos en concepto de adiciones a los activos fijos de la economía más las variaciones netas en el nivel de los inventarios. Los activos fijos incluyen los mejoramientos de terrenos (cercas, zanjas, drenajes, etc.), las adquisiciones de planta, maquinaria y equipo, construcción de carreteras, ferrocarriles, obras afines, incluidas las escuelas, oficinas, hospitales, viviendas residenciales privadas y los edificios industriales y comerciales. Los inventarios son las existencias de bienes que las empresas mantienen para hacer frente a fluctuaciones temporales o inesperadas de la producción o las ventas y los "productos en elaboración". También se incluyen las adquisiciones netas de objetos de valor.
+
+__Metodología de cálculo:__
+
+$$ PFBK_t = (\dfrac{FBK_t}{PIB_{t}})*100 $$
+Donde:
+
+- $PFBK_t$: Formación Bruta de Capital como \% del PIB en el año $t$.
+
+- $FBK_t$: Formación Bruta de Capital en el año $t$.
+
+- $PIB_{t}$: Producto Interno Bruto en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ la formación bruta de capital representó UN "x" \% del PIB.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Banco Mundial
+
+__Referencia bibliográfica:__ Banco Mundial

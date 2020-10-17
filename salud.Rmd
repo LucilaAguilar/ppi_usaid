@@ -17,6 +17,7 @@ editor_options:
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
+#library(wordcloud)
 library(tm)
 library(dplyr)
 library(ggplot2)
@@ -31,12 +32,24 @@ library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
+library(reshape)
+library(scales)
 #base de datos
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/salud.RData"))
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
 #setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-#db <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C31", sheet = "Hoja1", col_names = T), #stringsAsFactor = T)
-#db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), #stringsAsFactor = T)
-#db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), #stringsAsFactor = T)
+#db <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C31", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C11", sheet = "Hoja3", col_names = T), stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:C8", sheet = "Hoja4", col_names = T), stringsAsFactor = T)
+#db3 <- as.data.frame(read_excel("data_health.xlsx", range = "A1:N21", sheet = "Hoja5", col_names = T), stringsAsFactor = T)
+
+#save(db, db1, db2, db3, file = "salud.RData")
+
+db4 <- db3 %>% select(year, mort_1, mort_2,)
+db5 <- db3 %>% select(year, des_1, des_2,)
+db6 <- db3 %>% select(year, educ_1, educ_2,)
+db7 <- db3 %>% select(year, per_1, per_2, per_3, per_4)
+db8 <- db3 %>% select(year, causa_1, causa_2, causa_3)
 ```
 
 # Establecimientos de salud {data-navmenu="Salud" data-icon="fa-list"}
@@ -44,7 +57,7 @@ load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/salud.RData"
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Número de establecimientos de salud__
+### __SERIE HISTÓRICA <br> Número de establecimientos de salud__
 
 ```{r}
 g1 <- ggplot(data = db, aes(x = year, y = construccion, fill = level,  
@@ -52,7 +65,7 @@ g1 <- ggplot(data = db, aes(x = year, y = construccion, fill = level,
   geom_bar(stat = "identity", position = position_dodge()) + 
   scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
   labs(x = "Años", y = "Número de establecimientos de salud", fill = "Nivel")
-ggplotly(g1, tooltip = "text")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel de enseñanza </b>')))
 ```
  
 Column {data-width=400}
@@ -91,7 +104,7 @@ __Fuente de datos:__ Servicio Nacional de Información en Salud (SNIS).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Porcentaje de personas que cuentan con seguro de salud__
+### __SERIE HISTÓRICA <br> Porcentaje de personas que cuentan con seguro de salud__
 
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = seguro,  
@@ -138,7 +151,7 @@ __Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de 
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Tasa de mortalidad, menores de 5 años (por cada 1.000)__
+### __SERIE HISTÓRICA <br> Tasa de mortalidad, menores de 5 años (por cada 1.000)__
 
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = mort_inf, 
@@ -187,7 +200,7 @@ __Referencia bibliográfica:__ Organización Mundial de la Salud (OMS).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Prevalencia de anemia en la infancia (% de menores de 5 años)__
+### __SERIE HISTÓRICA <br> Prevalencia de anemia en la infancia (% de menores de 5 años)__
 
 ```{r}
 g4 <- ggplot(data = db2, aes(x = year, y = prev_anemia, 
@@ -236,7 +249,7 @@ __Referencia bibliográfica:__ Banco Mundial (BM).
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__  <br> __Madres adolescentes (% de mujeres entre 15 y 19 años que tuvieron hijos o se encuentran embarazadas)__
+### __SERIE HISTÓRICA <br> Madres adolescentes (% de mujeres entre 15 y 19 años que tuvieron hijos o se encuentran embarazadas)__
 
 ```{r}
 db2$year <- as.character(db2$year)
@@ -281,3 +294,312 @@ __Periodicidad:__ Anual.
 __Fuente de datos:__ Banco Mundial (BM) e Instituto Nacional de Estadística (INE).
 
 __Referencia bibliográfica:__ Banco Mundial (BM).
+
+
+
+# Mortalidad materno-infantil {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Mortalidad materno-infantil__
+
+```{r}
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="mort_2", "Razón de mortalidad materna", "Mortalidad neonatal")
+g6 <- ggplot(data = db4_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Mortalidad", caption = "Fuente: INE.", color = "")
+ggplotly(g6, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Mortalidad </b>')))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Mortalidad materno_infantil
+
+__Definición:__ La mortalidad materno-infantil se define como la muerte ya sea de la madre, del recién nacido o de ambos por cuaquier situación relacionada con el parto. Para poder medirlo se lo aproxima por medio de dos indicadores:
+
+-Razón de mortalidad materna (RMM): Defunción de una mujer entre 15 y 49 años de edad durante la gestación o dentro de los 42 días siguientes a la culminación del embarazo, por cada 100,000 nacimientos.
+
+-Mortalidad neonatal: Muerte de un infante que se da en el periodo desde el nacimiento hasta el primer mes de vida, expresado por cada 1000 nacidos vivos.
+
+__Metodología de cálculo:__
+
+-Razón de mortalidad materna
+
+$$ RMAT_t = \dfrac{PMAT_t*M_T}{N_t}*100,000 $$
+
+Donde:
+
+- $RMAT_t$: Razón de mortalidad materna por cada 100,000 nacidos vivos en el año $t$.
+
+- $PMAT_t$: Proporción de muertes materna del total de muertes en mujeres entre 15 a 49 años de edad en el año $t$.
+
+- $M_t$: Número de muertes de mujeres entre 15 a 49 años de edad en el año $t$.
+
+-$N_t$: Número de nacidos vivos en el año $t$.
+
+__Unidad de medida:__ Muertes maternas por cada 100,000 nacimientos
+
+__Interpretación:__ En el año $t$ se produjeron "x" muertes por 100,000 nacidos vivos.
+
+__Nivel de desagregación:__ Nacional 
+
+__Periodicidad:__ Cada 5 años.
+
+__Fuente de datos:__ UNICEF
+
+__Referencia bibliográfica:__ UNICEF
+
+
+
+# Desnutrición en menores de 5 años {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Desnutrición en menores de 5 años, por tipo de medida antropométrica__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="des_1", "Talla para la edad", "Peso para la edad")
+db5_1$year <- as.character(db5_1$year)
+g7 <- ggplot(data = db5_1, aes(x = year, y = value, group = variable, 
+                              color = variable,
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2003", "2008", "2016")) +  theme_gray() + 
+  scale_y_continuous(breaks = seq(0,30,by = 5)) +
+  labs(x = "Años", y = "Porcentaje de menores de 5 años", caption = "Fuente: INE.", color="")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Z-Score </b>')))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Desnutrición en menores de 5 años, por tipo de medida antropométrica.
+
+__Definición:__ Indicadores de desnutrición basados en medidas antrométricas (talla, peso, edad y sexo). Estos indicadores no sólo reflejan una baja ingesta de calorias y alimentos, sino también exposiciones a condicionantes ambientales.
+
+-Desnutrición crónica: Refleja el retardo de la altura para la edad.
+
+-Desnutrición global: Deficiencia de peso para la edad, el cual combina indiadores de desnutrición crónica y aguda.
+
+Estos indicadores se transforman a puntajes Z, desviaciones estándar por encima y debajo del promedio. Se define a un niño/a como desnutrido si su puntaje Z se encuentra por debajo de dos desviaciones estándar.
+
+__Metodología de cálculo:__
+
+$$ DES_i(t) = \dfrac{NN_i(t)}{TN(t)}*100 $$
+
+Donde:
+
+- $DES_i(t)$: Porcentaje de niños/as que presentan un nivel de desnutrición en el indicador de desnutrición $i$ en el año $t$.
+
+- $MA(15\,to\,19\,y)_t$: Número de niños/as que tienen un Z- score por debajo de dos desviaciones estándar en el indicador de desnutrición $i$ en el año $t$.
+
+- $TM(15\,to\,19\,y)_t$: Número total de niños/as en el año $t$.
+
+- $i$: Crónica, global
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ un "x"\% de niños/as presenta desnutrición crónica/global..
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Aproximadamente cada 5 años
+
+__Fuente de datos:__ Encuestas Nacionales de Demografía y Salud (ENDSA). Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ World Health Organization (WHO)
+
+# Conocimiento y uso de métodos modernos de anticoncepción {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Conocimiento y uso de métodos modernos de anticoncepción entre mujeres de 15 a 49 años de edad__
+
+```{r}
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="educ_1", "Uso", "Conocimiento")
+db6_1$year <- as.character(db6_1$year)
+g8 <- ggplot(data = db6_1, aes(x = year, y = value, group = variable, 
+                              color = variable,
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2003", "2008", "2016")) +  theme_gray() + 
+  scale_y_continuous(breaks = seq(0,100,by = 10)) +
+  labs(x = "Años", y = "Porcentaje de mujeres", caption = "Fuente: INE.", color="")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Educación sexual </b>')))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Conocimiento y uso de métodos modernos de anticoncepción entre mujeres de 15 a 49 años de edad.
+
+__Definición:__ Mujeres que conocen y/o usan métodos de anticoncepción modernos. Entre estos métodos se incluye la esterilización femenina, masculina, píldora anticonceptiva, dispositivo intrauterino (DIU), inyecciones anticonceptivas, implantes subdérmicos anticonceptivos, condón masculino y femenino, diafragma, espuma o jalea, método amenorrea por lactancia (MELA) y anticoncepción por emergencia.
+
+__Metodología de cálculo:__
+
+$$ PMUJ(t) = \dfrac{MUJC(t)}{TM(t)}*100 $$
+
+Donde:
+
+- $DES_i(t)$: Porcentaje de mujeres entre 15 y 49 años de edad que conocen y/o usan algún método moderno en el año $t$.
+
+- $MUJC(t)$:  Número de mujeres entre 15 y 49 años de edad que conocen y/o usan algún método moderno en el año $t$.
+
+- $TM(15\,to\,19\,y)_t$: Número total de mujeres entre 15 y 49 años de edad en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ un "x"\% de mujeres entre 15 y 49 años de edad conoce y/o usa métodos modernos de anticoncepción.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Aproximadamente cada 5 años
+
+__Fuente de datos:__ Encuestas Nacionales de Demografía y Salud (ENDSA). Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ World Health Organization (WHO)
+ 
+
+
+
+
+# Personal sanitario {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Personal sanitario, por tipo de personal en los establecimientos de salud__
+
+```{r}
+db7_1 <- melt(db7, id="year")
+db7_1$variable <- ifelse(db7_1$variable=="per_1", "Médicos", ifelse(db7_1$variable=="per_2", "Enfermeros/as", ifelse(db7_1$variable=="per_3", "Otro personal en salud", "Otro personal")))
+db7_1$year <- as.character(db7_1$year)
+g9 <- ggplot(data = db7_1, aes(x = year, y = value, fill = variable, 
+                        
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2016", "2017", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", fill="")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Personal sanitario </b>')))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Personal sanitario, por tipo de personal en los establecimientos de salud
+
+__Definición:__ Descomposició del personal sanitario en:
+- Médicos: Médicos y odontólogos
+
+-Enermeros/as: Auxiliares en enfermería y licenciados/as en enfermería
+
+-Otro personal en salud: Técnicos en salud, otros profesionales en salud, otros auxiliares en salud.
+
+-Otro personal: Técnicos y trabajadores en servicios en otras áreas.
+
+__Metodología de cálculo:__
+
+$$ PPS_i(t) = \dfrac{PS_i(t)}{TP(t)}*100 $$
+
+Donde:
+
+- $PPS_i(t)$: Porcentaje del personal de salud que pertenece a la categoría de personal $i$ en el año $t$.
+
+- $PS_i(t)$:  Número de personas que pertenece a la categoría de personal $i$ en el año $t$.
+
+- $TP(t)$: Número total de personal sanitario en el año $t$.
+
+- Categoría $i$: Médicos, enfermeros/as. otro personal de salud y otro personal.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$, "x" del personal sanitario pertenece a la categoría $i$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Ministerio de salud
+
+__Referencia bibliográfica:__ Ministerio de salud
+
+
+
+
+# Causas de muerte {data-navmenu="Salud" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Causas de muerte, por tipo de enfermedad__
+
+```{r}
+db8_1 <- melt(db8, id="year")
+db8_1$variable <- ifelse(db8_1$variable=="causa_1", "Enfermedades transmisibles, \n maternales y condiciones de nutrición", ifelse(db8_1$variable=="causa_2", "Enfermedades no transmisibles", "Lesiones"))
+db8_1$year <- as.character(db8_1$year)
+g10 <- ggplot(data = db8_1, aes(x = year, y = value, fill = variable, 
+                        
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2000", "2005", "2010", "2015")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", fill="")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Causa de muerte </b>')))
+```
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Causas de muerte, por tipo de enfermedad.
+
+__Definición:__ Muertes que ocurrieromn en un determinado periodo por causa de enfermedad. Entre las estimaciones del World Health Organization (WHO) se tienen tres grandes grupos:
+
+-Enfermedades transmisibles, maternas, perinatales y condiciones de nutrición: Incluyen enfermedades infecciosas y parasitarias, condiciones maternales, condiciones neo-natales y deficiencias nutricionales.
+
+-Enfermedades no transmisibles: Incluyen neoplasias malignas como tumores o cáncer, otras neoplasias, diabetes, transtornos endócrinos, de sangre e inmunitarios, transtornos mentales y por uso de substancias, condiciones neurológicas, enfermedades cardiovasculares, respiratorias, estomacales, geniurniarias, de la piel, músculos y/o esqueleto y anomalías congénitas.
+
+-Las lesiones incluyen lesiones intencionales y no intencionales.
+
+__Metodología de cálculo:__
+
+$$ PME_i(t) = \dfrac{ME_i(t)}{TM(t)}*100 $$
+
+Donde:
+
+- $PME_i(t)$: Porcentaje de muertes debido a las enfermedades de la categoría $i$ en el año $t$.
+
+- $ME_i(t)$:  Número uertes debido a las enfermedades de la categoría $i$ en el año $t$.
+
+- $TM(t)$: Número total de muertes en el año $t$.
+
+- Categoría $i$: Enfermedades transmisibles, maternas, perinatales y condiciones de nutrición, enfermedades no transmisibles y lesiones.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$, "x" del total de muertes se dieron por causas de las enfermedades de la categoría $i$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ World Health Organization (WHO)
+
+__Referencia bibliográfica:__ World Health Organization (WHO)
+
+

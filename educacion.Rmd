@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     
     navbar:
-    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}   
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -22,6 +22,7 @@ editor_options:
 
 ```{r,echo=F,message=F,warning=T,results=F}
 library(readxl)
+#library(wordcloud)
 library(tm)
 library(dplyr)
 library(ggplot2)
@@ -29,19 +30,30 @@ library(httr)
 library(plotrix)
 library(shiny)
 library(shinyWidgets)
+library(ggwordcloud)
 library(gridExtra)
 library(ggthemes)
 library(tidytext)
 library(plotly)
 library(flexdashboard)
 library(knitr)
+library(reshape)
 library(scales)
 #base de datos
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/educacion.RData"))
-#setwd("C:\\Users\\lenin\\OneDrive\\Documentos\\GitHub\\ppi_usaid\\_data")
-#db <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F41", sheet = "Hoja1", col_names = #T), stringsAsFactor = T)
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F41", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+#db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+#db3 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:R21", sheet = "Hoja3", col_names = T), stringsAsFactor = T)
+
+#save(db, db2, db3, file = "educacion.RData")
+
 db1 <- db %>% filter(year >= 2011)
-#db2 <- as.data.frame(read_excel("data_education.xlsx", range = "A1:F15", sheet = "Hoja2", col_names = #T), stringsAsFactor = T)
+db4 <- db3 %>% select(year, rezago_1, rezago_2,)
+db5 <- db3 %>% select(year, est_1, est_2, est_3, est_4, est_5, est_6, est_7)
+db6 <- db3 %>% select(year, docente_1, docente_2, docente_3)
+db7 <- db3 %>% select(year, tecnica_1, tecnica_2, tecnica_3, tecnica_4)
+db8 <- db7 %>% filter(year>=2005 & year <= 2019)
 ```
 
 
@@ -50,7 +62,7 @@ db1 <- db %>% filter(year >= 2011)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Número de estudiantes matriculados, según nivel de escolaridad__
+### __SERIE HISTÓRICA <br> Número de estudiantes matriculados, según nivel de escolaridad__
 
 ```{r}
 
@@ -59,8 +71,8 @@ g1 <- ggplot(data = db1, aes(x = year, y = matriculados, fill = primaria,
   geom_bar(stat = "identity", position = position_dodge()) +
   scale_y_continuous(labels = comma) +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "Número de estudiantes matriculados", fill = "Nivel")
-ggplotly(g1, tooltip = "text")
+  labs(x = "Años", y = "Número de estudiantes matriculados", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel educativo </b>')))
 ```
  
 Column {data-width=400}
@@ -89,15 +101,15 @@ __Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE).
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Tasa neta de matriculación, según nivel de escolaridad__
+### __SERIE HISTÓRICA <br> Tasa neta de matriculación, según nivel de escolaridad__
 
 ```{r}
 g2 <- ggplot(data = db1, aes(x = year, y = net_mat, group = primaria, 
                              color = primaria, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(net_mat,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", caption = "Fuente: INE.", color = "Nivel")
-ggplotly(g2, tooltip = "text")
+  labs(x = "Años", y = "En porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g2, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel educativo </b>')))
 ```
  
 Column {data-width=350}
@@ -139,15 +151,15 @@ __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educ
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Tasa de abandono escolar, según nivel de escolaridad__
+### __SERIE HISTÓRICA <br> Tasa de abandono escolar, según nivel de escolaridad__
 
 ```{r}
 g3 <- ggplot(data = db1, aes(x = year, y = abandono, group = primaria, 
                              color = primaria,  
                              text = paste("Año: ", year, "<br>Tasa: ", round(abandono,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c(2011:2019)) +  theme_gray() + 
-  labs(x = "Años", y = "En porcentaje", color = "Nivel", caption = "Fuente: SEIE.")
-ggplotly(g3, tooltip = "text")
+  labs(x = "Años", y = "En porcentaje", color = "", caption = "Fuente: SEIE.")
+ggplotly(g3, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel educativo </b>')))
 ```
  
 Column {data-width=400}
@@ -188,7 +200,7 @@ __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educ
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Gasto en educación, como porcentaje del PIB__
+### __SERIE HISTÓRICA <br> Gasto en educación, como porcentaje del PIB__
 
 ```{r}
 g4 <- ggplot(data = na.omit(db2), aes(x = year, y = gasto_edu_pib, 
@@ -232,12 +244,16 @@ __Fuente de datos:__ Sistema de Estadísticas e Indicadores Educativos (SEIE) e 
 
 __Referencia bibliográfica:__ Organización de las Naciones Unidas para la Educación, la Ciencia y la Cultura (UNESCO).
 
+
+
+
+
 # Tasa de matriculación educación terciaria {data-navmenu="Educación" data-icon="fa-list"}
 
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Tasa de matriculación bruta, educación terciaria__
+### __SERIE HISTÓRICA <br> Tasa de matriculación bruta, educación terciaria__
 
 ```{r}
 g5 <- ggplot(data = na.omit(db2), aes(x = year, y = educ_terc_raw, 
@@ -279,3 +295,282 @@ __Periodicidad:__ Anual.
 __Fuente de datos:__ Instituto Nacional de Estadística (INE), procesamiento de información proveniente de las Encuestas de Hogares de los años de referencia.
 
 __Referencia bibliográfica:__ Banco Mundial (BM).
+
+
+
+
+# Tasa de rezago escolar {data-navmenu="Educación" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Tasa de rezago escolar, por nivel__
+
+```{r}
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="rezago_1", "Primaria", "Secundaria")
+db4_1$year <- as.character(db4_1$year)
+g6 <- ggplot(data = db4_1, aes(x = year, y = value, group = variable, 
+                              color = variable,
+                             text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje de estudiantes rezagados", caption = "Fuente: INE.", color="")
+ggplotly(g6, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel educativo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa de rezago escolar
+
+__Definición:__ Es un indicador de riesgo de abanbono escolar, y se define como la proporción de estudiantes en un determinado nivel (primaria o secundaria) que tienen una edad mayor a la normativa para el grrado al que asisten. Se compone de la sumatoria de dos rezagos: rezago simple que comprende a los estudiantes que tienen entre 1 a 2 años más que la edad normativa y del rezago avanzado que comprende a los estudiantes que tienen 3 o más años que la edad definida por la normativa.
+
+__Metodología de cálculo:__
+
+$$ TREZ(t) = (1-\dfrac{EM^{ce}_{g}(t)}{MT_{g}(t)}) *100 $$
+
+Donde:
+
+- $TREZ(t)$: Tasa de matriculación bruta en educación terciaria para el periodo $t$.
+
+- $EM^{ce}_{g}(t)$: Número de estudiantes matriculados según su condición de edad $ce$ en el nivel escolar $g$  en el año $t$.
+
+- $MT_{g}(t)$: Número de estudiantes matriculados en el nivel escolar $g$ en el año $t$.
+
+- $g$: Inicial, primaria, secundaria
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ un "x" \% de estudiantes matriculados en el nivel $g$ se encuentran rezagados según su condición de edad comparado con la edad noramtiva para dicho nivel.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica:__ Ministerio de Educación
+
+
+
+
+# Años de escolaridad promedio de la población joven {data-navmenu="Educación" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Años de escolaridad promedio de la población entre 25 y 35 años__
+
+```{r}
+db3$year <- as.character(db3$year)
+g7 <- ggplot(data = db3, aes(x = year, y = escol, 
+                             text = paste("Año: ", year, "<br>Años: ", round(escol, 2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3)+
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Años de escolaridad", caption = "Fuente: INE")
+ggplotly(g7, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Años de escolaridad promedio de la población joven
+
+__Definición:__ Años de escolaridad promedio de la población entre 25 y 35 años. Este cohorte de edad permite ver de amnera más directa los efectos de las políticas aplicadas en los últimos años.
+
+__Metodología de cálculo:__
+
+$$ AES(t) = \dfrac{\sum_{i}^{N}P^{i}_{g}(t)}{PT_{g} (t)} $$
+
+Donde:
+
+- $AES(t)$: Años de escolaridad promedio de la población en el año $t$.
+
+- $\sum_{i}^{N}P^{i}_{g}(t)$: Sumatoria de los años de escolaridad de las personas $i$ que pertenecen al cohorte de edad $g$ en el año $t$.
+
+- $PT_{ET}(t)$: Población total del cohorte de edad $g$ en el año $t$.
+
+- $g$: Inicial, primaria, secundaria
+
+__Unidad de medida:__ Años de escolaridad
+
+__Interpretación:__ En el año $t$ la población entre 25 y 35 años de edad tiene en promedio "x" años de escolaridad.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica:__ Ministerio de educación
+
+
+
+
+# Establecimientos de educación según nivel de enseñanza {data-navmenu="Educación" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Establecimientos de educación según nivel de enseñanza__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="est_1", "Inicial", ifelse(db5_1$variable=="est_2", "Inicial/primaria", ifelse(db5_1$variable=="est_3", "Inicial/secundaria", ifelse(db5_1$variable=="est_4", "Inicial/primaria/secundaria", ifelse(db5_1$variable=="est_5", "Primaria", ifelse(db5_1$variable=="est_6", "Primaria/secundaria", "Secundaria"))))))
+g8 <- ggplot(data = db5_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: Ministerio de educación.", fill = "")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel de enseñanza </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Establecimientos de educación según nivel de enseñanza
+
+__Definición:__ Distribución de los establecimientos, públicos y privados, de acuerdo al nivel de enseñanza de la educación regular que se imparte en el mismo (inicial y/o primaria y/o secundaria),
+
+__Metodología de cálculo:__
+
+$$ EST_{i}(t) = \sum_{i}^{N}EE_{i}(t)$$
+
+Donde:
+
+- $EST_{i}(t)$: Nímmero total de establecimientos educativos que imparte los niveles de enseñanza $i$ en el año $t$.
+
+- $\sum_{i}^{N}EE_{i}(t)$: Sumatoria de los establecimientos educativos que imparte los niveles de enseñanza $i$ en el año $t$.
+
+- $i$: Incluye Inicial y/o primaria y/o secundaria
+
+__Unidad de medida:__ Número de establecimientos
+
+__Interpretación:__ En el año $t$ "x" estanlecimientos educativos imparten los niveles de enseñanza $i$
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Minsiterio de educación
+
+__Referencia bibliográfica:__ Ministerio de educación
+
+
+
+
+# Porcentaje de docentes pertinentes {data-navmenu="Educación" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Porcentaje de docentes pertinentes, según nivel educativo__
+
+```{r}
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="docente_1", "Inicial", ifelse(db6_1$variable=="docente_2", "Primaria", "Secundaria"))
+g9 <- ggplot(data = db6_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje de docentes", caption = "Fuente: Ministerio de educación.", color = "")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel de enseñanza </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Porcentaje de docentes pertienentes, según nivel educativo
+
+__Definición:__ Docentes, que cuenten con formación certificada para ejercer la docencia en el nivel que lo hacen, respecto al total de docentes de dicho nivel.
+
+Estos docentes cuentan con estudios superiores de formación de maestros o en programas que certifiquen conocimientos para el nivel de enseñanza en el que lo hacen. Estos conocimientos pueden ser pedagógicos como también específicos sobre la malla curricular del nivel correspondiente.
+
+__Metodología de cálculo:__
+
+$$ PDP_{g}(t) = \dfrac{DP_{g}(t)}{DT_{g}(t)} *100 $$
+
+Donde:
+
+- $PDP_{g}(t)$: Porcentaje de docentes pertienentes en el nivel $g$ en el año $t$.
+
+- $DP_{g}(t)$: Número de docentes pertinentes en el nivel $g$ en el año $t$.
+- $DT_{g}(t)$: Docentes totales en el nivel $g$ en el año $t$.
+
+- $g$: Inicial, primaria, secundaria
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $g$ existe un "x"\% de docentes pertinentes en el nivel $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Ministerio de educación
+
+__Referencia bibliográfica:__ Ministerio de educación
+
+
+# Descomposición por edades de la población con nivel educativo técnico {data-navmenu="Educación" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Descomposición por edades de la población con nivel educativo técnico__
+
+```{r}
+db8_1 <- melt(db8, id="year")
+db8_1$variable <- ifelse(db8_1$variable=="tecnica_1", "Menores a 25 años", ifelse(db8_1$variable=="tecnica_2", "25-35 años", ifelse(db8_1$variable=="tecnica_3", "36-64 años", "Más de 65 años")))
+db8_1$year <- as.character(db8_1$year)
+g10 <- ggplot(data = db8_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", fill = "")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Grupo de edad </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Descomposición por edades de la población con nivel educativo técnico
+
+__Definición:__ Personas que tienen como máximo nivel educativo un título de técnico de algún instituto que sea de una duración mayor o igual a 2 años de duración. Este indicador se los descompone por cohorte de edad.
+
+__Metodología de cálculo:__
+
+$$ PTEC_{g}(t) = \dfrac{PP_{g}(t)}{PT(t)} *100 $$
+
+Donde:
+
+- $PTEC_{g}(t)$: Porcentaje de personas con nivel educativo técnico que pertenecen al cohorte de edad $g$ respecto al total de personas con nivel técnico en el año $t$.
+
+- $PP_{g}(t)$: Total de personas con nivel educativo técnico que pertenecen al cohorte de edad $g$ en el año $t$.
+
+- $PT_{ET}(t)$: Total de personas con nivel educativo técnico en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x" \% de las personas con un nivel educativo técnico pertenecen al cohorte de edad $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica:__ Ministerio de educación
+

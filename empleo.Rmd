@@ -3,7 +3,7 @@ title: "VISUALIZACIÓN DE INDICADORES:"
 output: 
   flexdashboard::flex_dashboard:
     navbar:
-    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}   
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
     - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
     - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
     - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
@@ -38,13 +38,17 @@ library(reshape)
 #db1 <- db %>% filter(year >= 2011)
 #db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
 #setwd("D:\\ARU_Sergio\\usaid\\_data")
-#db <- as.data.frame(read_excel("data_empleo.xlsx", range = "A1:I21", col_names = T), stringsAsFactor = T)
+#db <- as.data.frame(read_excel("data_empleo.xlsx", range = "A1:W21", col_names = T), stringsAsFactor = T)
 #save(db, file = "empleo.RData")
 load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/empleo.RData"))
 db2 <- db %>% filter(year>=2000 & year <= 2019)
+db2_1 <- db %>% filter(year>=2005 & year <= 2019)
 db1 <- db2 %>% select(year, ocupacion_mujeres, ocupacion_hombres,)
 db4 <- db2 %>% select(year, sector_a, sector_b, sector_c,)
-
+db5 <- db2 %>% select(year, educ_1, educ_2, educ_3, educ_4,)
+db6 <- db2 %>% select(year, emp_1, emp_2, emp_3,)
+db7 <- db2 %>% select(year, seg_1, seg_2, seg_3, seg_4,)
+db8 <- db2 %>% select(year, par_1, par_2)
 
 ```
 
@@ -53,7 +57,7 @@ db4 <- db2 %>% select(year, sector_a, sector_b, sector_c,)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Porcentaje de ocupados que trabajan en el sector informal de la economía__
+### __SERIE HISTÓRICA <br> Porcentaje de ocupados que trabajan en el sector informal de la economía__
 
 ```{r}
 db2$year <- as.character(db2$year)
@@ -103,7 +107,7 @@ __Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Porcentaje de la población económicamente activa que se encuentran desocupados__
+### __SERIE HISTÓRICA <br> Porcentaje de la población económicamente activa que se encuentran desocupados__
 
 ```{r}
 db2$year <- as.character(db2$year)
@@ -154,7 +158,7 @@ __Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Tasa de ocupación según género__
+### __SERIE HISTÓRICA <br> Tasa de ocupación según género__
 
 ```{r}
 db3 <- melt(db1, id="year")
@@ -164,8 +168,8 @@ g3 <- ggplot(data = db3, aes(x = year, y = value, group = variable,
                              color = variable, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la población económicamente activa", caption = "Fuente: INE.", color = "Género")
-ggplotly(g3, tooltip = "text")
+  labs(x = "Años", y = "Porcentaje de la población económicamente activa", caption = "Fuente: INE.", color = "")
+ggplotly(g3, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Género </b>')))
 ```
  
 Column {data-width=400}
@@ -187,7 +191,7 @@ Donde:
 
 - $PO^{g}_{t}$: Población ocupada según género $g$ en el año $t$.
 
-- $PET^{g}(t)$: Población económicamente activa según género $g$ en el año $t$.
+- $PET^{g}(t)$: Población en edad de trabajar según género $g$ en el año $t$.
 
 -Género ($g$): Mujeres, hombres.
 
@@ -208,18 +212,18 @@ __Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Descomposición de la población ocupada según actividad económica__
+### __SERIE HISTÓRICA <br> Descomposición de la población ocupada según actividad económica__
 
 ```{r}
-db5 <- melt(db4, id="year")
-db5$variable <- ifelse(db5$variable=="sector_a", "Agricultura", ifelse(db5$variable=="sector_b", "Industria", "Servicios"))
-db5$year <- as.character(db5$year)
-g4 <- ggplot(data = db5, aes(x = year, y = value, group = variable, 
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="sector_a", "Agricultura", ifelse(db4_1$variable=="sector_b", "Industria", "Servicios"))
+db4_1$year <- as.character(db4_1$year)
+g4 <- ggplot(data = db4_1, aes(x = year, y = value, group = variable, 
                              color = variable, 
                              text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
   scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
-  labs(x = "Años", y = "Porcentaje de la población ocupada", caption = "Fuente: INE.", color = "Sector")
-ggplotly(g4, tooltip = "text")
+  labs(x = "Años", y = "Porcentaje de la población ocupada", caption = "Fuente: INE.", color = "")
+ggplotly(g4, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Sector </b>')))
 ```
  
 Column {data-width=400}
@@ -268,7 +272,7 @@ __Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
 Column {data-width=600}
 -----------------------------------------------------------------------
 
-### __SERIE HISTÓRICA__ <br> __Producto por trabajador (PIB en $us a precios constantes 2010)__
+### __SERIE HISTÓRICA <br> Producto por trabajador (PIB en $us a precios constantes 2010)__
 
 ```{r}
 g5 <- ggplot(data = db, aes(x = year, y = productividad, 
@@ -308,5 +312,295 @@ __Nivel de desagregación:__ Nacional
 __Periodicidad:__ Anual
 
 __Fuente de datos:__ Estimaciones de la Organización Internacional del Trabajo, ILOSTAT
+
+__Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
+
+
+
+
+# Subempleo {data-navmenu="Empleo" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Trabajadores que se encuentran subempleados__
+
+```{r}
+g6 <- ggplot(data = db2_1, aes(x = year, y = subempleo, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(subempleo,2) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2005:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: ILOSTAT.")
+ggplotly(g6, tooltip = "text")
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Trabajadores que se encuentran subempleados
+
+__Definición:__ Empleados que estan dispuestos a trabajar más hors, están disponibles para trabajar más horas, trabajaron menos horas que un umbral de horas establecidas en e país.
+
+__Metodología de cálculo:__
+
+$$PSUB(t) =\dfrac{PS_{C}}{PO(t)}*100 $$
+
+Donde:
+
+- $PSUB(t)$: Proporción de empleados que son subempleados en el año $t$.
+
+- $PS_{C}$: Personas subempleadas en el año $t$.
+
+- $Po_{C}$: Total de personas ocupadas en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__  En el año $t$ "x" \% de los empleados se encuentran subempleados.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estimaciones de la Organización Internacional del Trabajo, ILOSTAT
+
+__Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
+
+
+# Descomposicón de la población ocupada por nivel de educación {data-navmenu="Empleo" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Descomposicón de la población ocupada por nivel de educación__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="educ_1", "Inferior a básico", ifelse(db5_1$variable=="educ_2", "Básica", ifelse(db5_1$variable=="educ_3", "Intermedia", "Avanzada")))
+db5_1$year <- as.character(db5_1$year)
+g7 <- ggplot(data = db5_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", fill = "")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Nivel de educación </b>')))
+
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Descomposicón de la población ocupada por nivel de educación
+
+__Definición:__ Descomposición de la población ocupada de 15 años o más de edad, en su actividad principal, de acuerdo a su nivel de educación.
+
+-Inferior básico: Sin escolaidad o con educación inicial
+
+-Básica: Educación primaria o educación secundaria incompleta.
+
+-Intermedio: Secundaria completa, estudios superiores que no son educación superior.
+
+-Avanzada: Educación supeior, terciaria, maestria o doctorado.
+
+$$PEDUC^{s}_{t} =\dfrac{PO^{s}_{t}}{PO(t)}*100 $$
+
+Donde:
+
+- $PEDUC^{s}_{t}$: Porcentaje de la población que posee un nivel educativo $s$ en el año $t$.
+
+- $PO^{s}_{t}$: Población ocupada con un nivel educativo $s$ en el año $t$.
+
+- $PO(t)$: Población ocupada en el año $t$.
+
+-Niveles educativos ($s$): Inferior a básico, básico, intermedio y avanzada.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x" \% de la población ocupada tenía un nivel educativo $s$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estimaciones de la Organización Internacional del Trabajo, ILOSTAT
+
+__Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
+
+
+# Descomposición de los ocupados por categoría ocupacional {data-navmenu="Empleo" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Descomposición de los ocupados por categoría ocupacional__
+
+```{r}
+
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="emp_1", "Asalariados", ifelse(db6_1$variable=="emp_2", "Independientes", "No remunerados"))
+db6_1$year <- as.character(db6_1$year)
+g8 <- ggplot(data = db6_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje de la población ocupada", caption = "Fuente: INE.", fill = "")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Categoría ocupacional </b>')))
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Descomposición de los ocupados por categoría ocupacional
+
+__Definición:__ Descomposición de la población ocupada de 15 años o más de edad, en su actividad principal, de acuerdo a su categoría ocupacional.
+
+-Asalariados
+
+-Independientes
+
+-Trabajadores no remunerados
+
+__Metodología de cálculo:__
+
+$$PEDUC^{s}_{t} =\dfrac{PO^{s}_{t}}{PO(t)}*100 $$
+
+Donde:
+
+- $PEDUC^{s}_{t}$: Porcentaje de la población que tiene como categoría ocupacional $s$ en el año $t$.
+
+- $PO^{s}_{t}$: Población ocupada que tiene una categoría ocupacional $s$ en el año $t$.
+
+- $PO(t)$: Población ocupada en el año $t$.
+
+-Niveles educativos ($s$): Asalariados, independientes, trabajadores no remunerados.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x" \% de la población ocupada pertenece a la categoría ocupacional $s$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estimaciones de la Organización Internacional del Trabajo, ILOSTAT
+
+__Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
+
+
+# Población ocupada con seguro social de largo plazo {data-navmenu="Empleo" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Población ocupada que cuenta con seguro social de largo plazo según categoría ocupacional__
+
+```{r}
+db7_1 <- melt(db7, id="year")
+db7_1$variable <- ifelse(db7_1$variable=="seg_1", "Total trabajadores", ifelse(db7_1$variable=="seg_2", "Asalariados", ifelse(db7_1$variable=="seg_3", "Independientes", "No reumnerados")))
+db7_1$year <- as.character(db7_1$year)
+g9 <- ggplot(data = db7_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje de la población ocupada", caption = "Fuente: INE.", color = "")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Categoría ocupacional </b>')))
+
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Población ocupada que cuenta con seguro social de largo plazo según categoría ocupacional
+
+__Definición:__ Porcentaje de la población ocupada que se encuentra afiliad a alguna Adminstradora de Fondos de Pensiones (AFPs)
+
+__Metodología de cálculo:__
+
+$$PAPS^{s}_{t} =\dfrac{PO^{s}_{t}}{PO(t)}*100 $$
+
+Donde:
+
+- $PAPS^{s}_{t}$: Porcentaje de la población en la categoría ocupacional $s$ que se encuetra afiliada a una AFPs en el año $t$.
+
+- $PO^{s}_{t}$: Población ocupada en la categoría ocupacional $s$ que se encuentra afiliada a una AFP en el año $t$.
+
+- $PO(t)$: Población ocupada en la categoría ocupacional $s$ en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x" \% de la población ocupada en la categoría ocupacional $s$ se encontraba afiliada a una AFP.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
+
+
+# Tasa global de participación, según género{data-navmenu="Empleo" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Tasa global de participación, según género__
+
+```{r}
+db8_1 <- melt(db8, id="year")
+db8_1$variable <- ifelse(db8_1$variable=="par_1", "Mujeres", "Hombres")
+db8_1$year <- as.character(db8_1$year)
+g10 <- ggplot(data = db8_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje de la población en edad de trabajar", caption = "Fuente: INE.", color = "")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Género </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tasa global de participación, según género
+
+__Definición:__ Es el porcentaje de la población en edad de trabajar (personas de 10 años o más de edad) que esparte de la población en edad de trabajar.
+
+__Metodología de cálculo:__
+
+$$TGP^{g}_{t} =\dfrac{PEA^{g}_{t}}{PET^{g}(t)}*100 $$
+
+Donde:
+
+- $TGP^{g}_{t}$: Porcentaje de la población en edad de trabajar que pertenence a la población economicamente activa según género $g$ en el año $t$.
+
+- $PEA^{g}_{t}$: Población económicamente activa según género $g$ en el año $t$.
+
+- $PET^{g}(t)$: Población en edad de trabajar según género $g$ en el año $t$.
+
+-Género ($g$): Mujeres, hombres.
+
+__Unidad de medida:__ Porcentaje (\%)
+
+__Interpretación:__ "x" porcentaje de la población en edad de trabajar del género $g$ pertenece a la población económicamente activa en el año $t$.
+
+__Nivel de desagregación:__ Nacional - Género
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
 
 __Referencia bibliográfica__ Organización Internacional del Trabajo (ILO)
