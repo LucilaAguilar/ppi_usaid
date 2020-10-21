@@ -1,0 +1,629 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+#runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+#library(wordcloud)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape)
+library(scales)
+#base de datos
+#db <- as.data.frame(read_excel("D:/ARU/PPI USAID/_data/indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
+#db1 <- db %>% filter(year >= 2011)
+#db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_genero.xlsx", range = "A1:S21", col_names = T), stringsAsFactor = T)
+
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db7 <- as.data.frame(read_excel("data_genero.xlsx", range = "A1:C8",  sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+
+#save(db, db7, file = "genero.RData")
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/genero.RData"))
+
+db1 <- db %>% select(year, ed_1, ed_2, ed_3, ed_4)
+db2 <- db %>% select(year, ed_5, ed_6,)
+db3 <- db %>% select(year, lab_1, lab_2,)
+db4 <- db %>% select(year, lab_3, lab_4, lab_5, lab_6,)
+db5 <- db %>% select(year, lab_7, lab_8,)
+db6 <- db %>% select(year, pob_1, pob_2, pob_3,)
+```
+
+# Paridad de género en asistencia escolar {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Paridad de género en asistencia escolar__
+
+```{r}
+db1_1 <- melt(db1, id="year")
+db1_1$variable <- ifelse(db1_1$variable=="ed_1", "Asistencia primaria bruta", ifelse(db1_1$variable=="ed_2", "Asistencia primaria neta", ifelse(db1_1$variable=="ed_3", "Asistencia secundaria bruta", "Asistencia secundaria neta")))
+db1_1$year <- as.character(db1_1$year)
+g1 <- ggplot(data = db1_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Tasa: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Paridad </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Paridad de género en asistencia escolar
+
+__Definición:__ Asistencia escolar a la educación regular de las personas entre 6 y 18 años de las mujeres comparado con el de los hombres.
+
+__Metodología de cálculo:__
+
+$$PGASIS(t) =\dfrac{ASISM(t)}{ASISH(t)} $$
+
+Donde:
+
+- $PGASIS(t)$: Paridad de género en asistencia escolar en el año $t$.
+
+- $ASISM(t)$: Asistencia escolar de las mujeres en el año $t$.
+
+- $ASISM(t)$: Asistencia escolar de los hombres en el año $t$.
+
+__Unidad de medida:__ Datos mujeres sobre el dato de hombres
+
+__Interpretación:__ En el año $t$ por cada 100 hombres que asisten al colegio asisten "x" mujeres.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Objetivos de Desarrollo Sostenible (ODS)
+
+
+
+
+# Años de escolaridad, según género {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Años de escolaridad, según género__
+
+```{r}
+db2_1 <- melt(db2, id="year")
+db2_1$variable <- ifelse(db2_1$variable=="ed_5", "Mujeres", "Hombres")
+db2_1$year <- as.character(db2_1$year)
+g2 <- ggplot(data = db2_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Años de escolaridad", caption = "Fuente: INE.", color = "")
+ggplotly(g2, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Años de escolaridad </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Años de escolaridad, según género
+
+__Definición:__ Promedio de los años de escolaridad de la población entre 25 y 35 años según género
+
+__Metodología de cálculo:__
+
+$$AES^{g}_{t} =\dfrac{\sum_{i=1}^{N} E_{i}}{POB^{g}_{t}}*100 $$
+
+Donde:
+
+- $AES^{g}_{t}$: Años de escolaridad promedio del género $g$ en el año $t$.
+
+- $\sum_{i=1}^{N} E_{i}$: Sumatoria de los años de escolaridad de las personas del género $g$ en el año $t$.
+
+- $POB^{g}_{t}$: Población total del género $g$ en el año $t$.
+
+- Género ($g$): Mujeres, hombres.
+
+__Unidad de medida:__ Años de escolaridad
+
+__Interpretación:__ En el año $t$ los años de escolaridd promedio del género $g$ fue de "x".
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+# Índice de carga económica {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Índice de carga económica, por género__
+
+```{r}
+db3_1 <- melt(db3, id="year")
+db3_1$variable <- ifelse(db3_1$variable=="lab_1", "Mujeres", "Hombres")
+db3_1$year <- as.character(db3_1$year)
+g3 <- ggplot(data = db3_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Años de escolaridad", caption = "Fuente: INE.", color = "")
+ggplotly(g3, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Género </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Índice de carga económica, por género
+
+__Definición:__ Relaciona a la población económicamente inactiva con la población activa, es decir, cuantas personas ianctivas existen por cada persona activa.
+
+__Metodología de cálculo:__
+
+$$ICE^{g}_{t} =\dfrac{PEI^{g}(t)}{PEA^{g}(t)}*100 $$
+
+Donde:
+
+- $ICE^{g}_{t}$: Índice de carga económica del género $g$ en el año $t$.
+
+- $PEI^{g}_{t}$: Población económicamente inactiva según género $g$ en el año $t$.
+
+- $PEA^{g}(t)$: Población económicamente activa según género $g$ en el año $t$.
+
+-Género ($g$): Mujeres, hombres.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ por cada 100 personas activas existían "x" personas inactivas, según género
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+# Distribución de los ocupados según tiempo dedicado al trabajo {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Distribución de los ocupados según tiempo dedicado al trabajo__
+
+```{r}
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="lab_3", "Mujeres, tiempo completo", ifelse(db4_1$variable=="lab_4", "Hombres, tiempo completo", ifelse(db4_1$variable=="lab_5", "Mujeres, tiempo parcial", "Hombres, tiempo parcial")))
+db4_1$year <- as.character(db4_1$year)
+g4 <- ggplot(data = db4_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g4, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagreagción </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Distribución de los ocupados según tiempo dedicado al trabajo
+
+__Definición:__ El indicador descompone a las personas empleadas según el número promedio de horas dedicadas a la semana en la actividad principal. Si una personas declara trabajar 40 horas o más a la semana, se considera que es un trabajador a tiempo completo. Si una persona declara que trabaja menos de 40 horas a la semana, se considera que es un trabaajdor a tiempo parcial.
+
+__Metodología de cálculo:__
+
+$$TPE^{g}_{e}(t) =\dfrac{PH^{g}_{e}(t)}{PO^{g}(t)}*100 $$
+
+Donde:
+
+- $TPE^{g}_{e}(t)$: Porcentaje de la población empleada que se clasifica como trabajadora $e$ según el tiempo dedicado a la actividad principal  según género $g$ en el año $t$.
+
+- $PH^{g}_{e}(t)$: Población ocupada que se clasifica como trabajadora $e$ según el tiempo dedicado a la actividad principal  según género $g$ en el año $t$.
+
+- $PO^{g}(t)$: Población ocupada total según género $g$ en el año $t$.
+
+- Género ($g$): Mujeres, hombres.
+
+- Tiempo dedicado al trabajo $e$: Tiempo parcial, tiempo completo.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ x\% de la población ocupada trabajaba como $e$ según el tiempo dedicado al trabajo en su actividad principal según género $g$. 
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+
+# Brecha salarial {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Brecha salarial__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="lab_7", "Mujeres", "Hombres")
+db5_1$year <- as.character(db5_1$year)
+g5 <- ggplot(data = db5_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Ingreso medio: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Ingreso real", caption = "Fuente: INE.", color = "")
+ggplotly(g5, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Ingreso medio real mensual </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Brecha salarial
+
+__Definición:__ Muetsra la brecha existente entre el salario de los mujeres y el salario de los hombres. Se define como el ratio promedio entre el ingreso medio mensual real de las mujeres sobre el ingreso medio mensual real de los hombres.
+
+__Metodología de cálculo:__
+
+$$B_{t} =\dfrac{\dfrac{\sum_{m=1}^{n} E_{m}}{POB_{m}(t)}}{\dfrac{\sum_{h=1}^{n} E_{h}}{POB_{h}(t)}} $$
+
+Donde:
+
+- $B_{t}$: Brecha de ingresos mensual medio real entre géneros en el año $t$.
+
+- $\sum_{m=1}^{n} E_{m}$: SUmatoria de los ingresos medio mensuales reales de las mujeres en el año $t$.
+
+- $POB_{m}(t)$: Total mujeres ocupadas en el año $t$.
+
+- $\sum_{h=1}^{n} E_{h}$: SUmatoria de los ingresos medio mensuales reales de los hombres en el año $t$.
+
+- $POB_{h}(t)$: Total hombres ocupadas en el año $t$.
+
+__Unidad de medida:__ Ingreso de las mujeres sobre el ingreso de los hombres.
+
+__Interpretación:__ En el año $t$ en promedio por cada boliviano mensual que gana un hombre en su actividad principal, las mujeres ganan "x" bolivianos en su actividad principal.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Objetivos de Desarrollo Sostenible (ODS)
+
+
+# Paridad de género en pobreza multidimensional {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Paridad de género en pobreza multidimensional__
+
+```{r}
+db$year <- as.character(db$year)
+g6 <- ggplot(data = db, aes(x = year, y = pob_3, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(pob_3,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.")
+ggplotly(g6, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Paridad de género en pobreza multidimensional
+
+__Definición:__ Número de hogares con jefes de hogar mujeres que son pobres multidimensionales sobre el número de hogares con jefes de hogar hombres que son pobres multidimensionales.
+
+Para definir la jefatura del hogar se utiliza un criterio económico. Una persona será el jefe de hogar si este es el mayor aportante de ingresos sobre los ingresos totales del hogar.
+
+__Metodología de cálculo:__
+
+$$PGPOBM(t) =\dfrac{PMM(t)}{PMH(t)} $$
+
+Donde:
+
+- $PGPOBM(t)$: Paridad de género en la pobreza multidimensional en el año $t$.
+
+- $PMM(t)$: Número de hogares pobres multidimensionales con jefes de hogar mujeres en el año $t$.
+
+- $PMH(t)$: Número de hogares pobres multidimensionales con jefes de hogar hombres en el año $t$.
+
+__Unidad de medida:__ Datos mujeres sobre el dato de hombres
+
+__Interpretación:__ En el año $t$ por cada 100 hogares con jefes de hogar hombres que son pobres multidimensionales "x" hogares con jefes de hogar mujeres se encuentran en la misma situación.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2006-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Objetivos de Desarrollo Sostenible (ODS)
+
+
+
+# Número de feminicidios {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Número de feminicidios__
+
+```{r}
+db$year <- as.character(db$year)
+g7 <- ggplot(data = db, aes(x = year, y = femin, group=1,  
+                             text = paste("Año: ", year, "<br>Valor: ", round(femin,0) ))) + 
+geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_y_continuous(labels = comma) +
+   scale_x_discrete(limits = c("2016", "2017", "2018", "2019")) + theme_gray() + 
+  labs(x = "Años", y = "Número de feminicidios", fill = "Reservas")
+ggplotly(g7, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Número de feminicidios
+
+__Definición:__ Cuantificación anual del númerototal de homicidios de muejres de 15 años de edad o más, asesinadas por razones de género. Siguiendo a las legislaciones nacionales se denomina feminicidios, feminicidios u homicidios agravados por razones de género.
+
+__Metodología de cálculo:__ No aplica
+
+__Unidad de medida:__ Número de feminicidios
+
+__Interpretación:__ En el año $t$ fueron asesinadas "x" mujeres por cuestiones de género.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadísticas de la Cepal. CEPALSTAT
+
+__Referencia bibliográfica__ Cepalstat
+
+
+# Violencia hacia la mujer en el ámbito público {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Violencia hacia la mujer en el ámbito público__
+
+```{r}
+db8 <- melt(db7, id="desag")
+db8$variable <- ifelse(db8$variable=="viol_1", "A lo largo de su vida", "Últimos 12 meses")
+g8 <- ggplot(data = db8, aes(x = desag, y = value, fill = variable, 
+                             
+                            text = paste("Ámbito: ", desag, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar( stat = "identity", position = position_dodge()) + 
+    theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Ámbito", y = "Porcentaje", caption = "Fuente: INE", fill="")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Periodo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Violencia hacia la mujer en el ámbito público
+
+__Definición:__ Casos de violencia haica la mujer en el ámbito público, desagregado en el ámbito social, educativo y laboral.
+
+Se define como violencia si la mujer reporta haber experimentado algún tipo de violencia psicológica (humillación, menospreciación, amenazas de hacerle algún daño, piropos o frases de carácter sexual que la hayan molestado), violencia física (agresión física) o violencia sexual (la manosearon o tocaron su cuerpo sin su consentimiento, obligaron a tener relaciones sexuales) por parte de algún familiar, amigo o conocido, desconocido, director/maestro/docentes, compañeros de escuela (ámbito educativo), jefe o patrón, cliente, compañero de trabajo (ámbito laboral) u otro.
+
+Se distingue entre la violencia recibida en cualquier momento de su vida o en los últimos 12 meses.
+
+__Metodología de cálculo:__
+
+$$PMV^{g} =\dfrac{MV^{g}}{TM(t)}*100 $$
+
+Donde:
+
+- $PMV^{g}$: Porcentaje de mujeres que sufrieron algún tipo de violencia en el ámbito $g$.
+
+- $MV^{g}$: Número de mujeres que sufrieron algún tipo de violencia en el ámbito $g$.
+
+- $TM(t)$: Total mujeres en el año $t$.
+
+-Ámbito ($g$): Público, social, educativo, laboral.
+
+__Unidad de medida:__ POrcentaje
+
+__Interpretación:__ X\% de mujeres fue víctima de algún tipo de violencia en el ámbito $g$ a lo largo de su vida o en los últimos 12 meses.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Única, 2016.
+
+__Fuente de datos:__ Encuesta de Prevalencia de Violencia contra la Mujer.
+
+__Referencia bibliográfica__ INE
+
+
+```{r}
+setwd("D:\\ARU_Sergio\\usaid\\_data")
+db7 <- as.data.frame(read_excel("data_genero.xlsx", range = "D1:F6",  sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+
+```
+
+# Violencia hacia la mujer en el ámbito privado {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Mujeres casadas que sufrieron violencia por su pareja__
+
+```{r}
+db8 <- melt(db7, id="desag")
+db8$variable <- ifelse(db8$variable=="viol_3", "A lo largo de su vida", "Últimos 12 meses")
+g9 <- ggplot(data = db8, aes(x = desag, y = value, fill = variable, 
+                             
+                            text = paste("Violencia: ", desag, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar( stat = "identity", position = position_dodge()) + 
+    theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Tipo de violencia", y = "Porcentaje", caption = "Fuente: INE", fill="")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Periodo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Mujeres casadas que sufrieron violencia por su pareja
+
+__Definición:__ Casos de violencia haciaa las mujeres casadas en el ámbito privado, es decir, por su esposo.
+
+Se define como violencia si la mujer reporta haber experimentado algún tipo de violencia psicológica (insultos, humillación, encierros, menospreciación, amenazas de hacerle algún daño o matarla), violencia física (golpes, patadas, empujones, agresión física, daños con arma punzante o arma de fuego), violencia sexual (relaciones sexuales forzadas, realziar cosas que a usted no le gustan) o económica (prohibir adquirir propiedades a su nombre, quitado, destruído o adeñuado de sus cosas).
+
+Se distingue entre la violencia recibida en cualquier momento de su vida o en los últimos 12 meses.
+
+__Metodología de cálculo:__
+
+$$PMV^{g} =\dfrac{MV^{g}}{TM(t)}*100 $$
+
+Donde:
+
+- $PMV^{g}$: Porcentaje de mujeres que sufrieron algún tipo de violencia por su esposo.
+
+- $MV^{g}$: Número de mujeres que sufrieron algún tipo de violencia por su esposo.
+
+- $TM(t)$: Total mujeres en el año $t$.
+
+__Unidad de medida:__ POrcentaje
+
+__Interpretación:__  X\% de las mujeres casadas fueron víctimas de algún tipo de violencia en el ámbito privado por su esposo/pareja a lo largo de su vida o en los últimos 12 meses.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Única, 2016.
+
+__Fuente de datos:__ Encuesta de Prevalencia de Violencia contra la Mujer.
+
+__Referencia bibliográfica__ INE
+
+
+
+
+```{r}
+setwd("D:\\ARU_Sergio\\usaid\\_data")
+db7 <- as.data.frame(read_excel("data_genero.xlsx", range = "G1:I6",  sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+
+```
+
+# Mujeres de 15 años o más que sufrieron algún tipo de abuso sexual  {data-navmenu="Género" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Mujeres de 15 años o más que sufrieron algún tipo de abuso sexual__
+
+```{r}
+db8 <- melt(db7, id="desag")
+db8$variable <- ifelse(db8$variable=="viol_5", "A lo largo de su vida", "Últimos 12 meses")
+g10 <- ggplot(data = db8, aes(x = desag, y = value, fill = variable, 
+                             
+                            text = paste("Violencia: ", desag, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar( stat = "identity", position = position_dodge()) + 
+    theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Tipo de violencia", y = "Porcentaje", caption = "Fuente: INE", fill="")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Periodo </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Mujeres de 15 años o más que sufrieron algún tipo de abuso sexual
+
+__Definición:__ Se define como abuso sexual si la mujer experimentó algún tipo de abuso de los siguientes:
+
+-Obligar a desvertirse, mostrar o mirar partes íntimas de otra persona.
+
+-Manosearon o tocaron su cuerpo sin su consentimiento
+
+-obligaron a tocar las partes íntimas de otra persona
+
+-Obligaron a tener relaciones sexuales mediantes engaños, chantajes o amenazas, mediante el uso de la fuerza o por finero o fines económicos.
+
+Se distingue entre la violencia recibida en cualquier momento de su vida o en los últimos 12 meses.
+
+__Metodología de cálculo:__
+
+$$PMV^{g} =\dfrac{MV^{g}}{TM(t)}*100 $$
+
+Donde:
+
+- $PMV^{g}_{t}$: Porcentaje de mujeres que sufrieron algún tipo de violencia o abuso sexual.
+
+- $MV^{g}_{t}$: Número de mujeres que sufrieron algún tipo de violencia o abuso sexual.
+
+- $TM(t)$: Total mujeres en el año $t$.
+
+__Unidad de medida:__ POrcentaje
+
+__Interpretación:__ X\% de las mujeres mayores de 15 años sufrieron algún tipo de violencia sexual o abuso.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Única, 2016.
+
+__Fuente de datos:__ Encuesta de Prevalencia de Violencia contra la Mujer.
+
+__Referencia bibliográfica__ INE
+

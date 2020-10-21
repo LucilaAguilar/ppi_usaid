@@ -1,0 +1,793 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+#runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+#library(wordcloud)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape)
+library(scales)
+#base de datos
+#db <- as.data.frame(read_excel("D:/ARU/PPI USAID/_data/indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
+#db1 <- db %>% filter(year >= 2011)
+#db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_igualdad.xlsx", range = "A1:B4", sheet = "Hoja2", col_names = T), stringsAsFactor = T)
+#db1 <- as.data.frame(read_excel("data_igualdad.xlsx", range = "A1:S21", sheet = "Hoja1", col_names = T), stringsAsFactor = T)
+#db8 <- as.data.frame(read_excel("data_igualdad.xlsx", range = "A1:M5", sheet = "Hoja3", col_names = T), stringsAsFactor = T)
+
+#save(db, db1, db8, file = "igualdad.RData")
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/igualdad.RData"))
+
+
+
+db2 <- db1 %>% select(year, pol_3, pol_4,)
+db3 <- db1 %>% select(year, dis_1, dis_2, dis_3, dis_4)
+db4 <- db1 %>% select(year, dis_5, dis_6,)
+db5 <- db1 %>% select(year, dep_1, dep_2, dep_3,)
+db6 <- db1 %>% select(year, esp_1, esp_2, esp_3)
+db7 <- db1 %>% select(year, ind_1, ind_2, ind_3,)
+
+
+
+db9 <- db8 %>% select(desag, hombre_1, hombre_2, hombre_3, hombre_4,)
+db10 <- db8 %>% select(desag, mujer_1, mujer_2, mujer_3, mujer_4,)
+db11 <- db8 %>% select(desag, hombre_5, hombre_6,)
+db12 <- db8 %>% select(desag, mujer_5, mujer_6,)
+
+```
+
+
+# Porcentaje de mujeres en los gabinetes ministeriales  {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Porcentaje de mujeres en los gabinetes ministeriales__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = desag, y = pol_2, group=1,  
+                             text = paste("Año: ", desag, "<br>Valor: ", round(pol_2,0) ))) + 
+geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+   theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "Reservas")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Porcentaje de mujeres en los gabinetes ministeriales
+
+__Definición:__ Porcentaje de de mujeres que ocupan carteras ministeriales en un período presidencial o de gobierno de un primer ministro.
+
+__Metodología de cálculo:__
+
+$$PMUJ_{t} =\dfrac{NMUJ_{t}}{TMIN_t}*100 $$
+
+Donde:
+
+- $PMUJ_{t}$: Porcentaje de mujeres ministras en el periodo presidencial $t$.
+
+- $NMUJ_{t}$: Número de mujeres ministras en el periodo presidencial $t$.
+
+- $TMIN_t$: Número total de ministros y ministras en el periodo presidencial $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el periodo presidencial $t$ "x"\% de los ministros eran mujeres.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadísticas de la Cepal. Cepalstat
+
+__Referencia bibliográfica__ Cepal
+
+
+
+# Proporción de escaños ocupados por mujeres en los parlamentos nacionales {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Proporción de escaños ocupados por mujeres en los parlamentos nacionales__
+
+```{r}
+g2 <- ggplot(data = db1, aes(x = year, y = pol_1, group=1,  
+                             text = paste("Año: ", year, "<br>Valor: ", round(pol_1,0) ))) + 
+geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2019)) +
+   theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", fill = "Reservas")
+ggplotly(g2, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Proporción de escaños ocupados por mujeres en los parlamentos nacionales.
+
+__Definición:__ Proporción de mujeres que ocupan puestos en el parlamento nacional en la cámara baja o única.
+
+__Metodología de cálculo:__
+
+$$PMUJP_{t} =\dfrac{MUJP_{t}}{TOTP_t}*100 $$
+
+Donde:
+
+- $TPO^{g}_{t}$: Porcentaje de paralamentarios en la cámara baja o única que son mujeres en el año $t$.
+
+- $PO^{g}_{t}$: Número total de paralamentarias mujeres en la cámara baja o única en el año $t$.
+
+- $TOTP_t$: Número total de parlamentarios en la cámara baja o única en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x"\% de los parlamentarios en la cámara baja o única son mujeres
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadísticas de la Cepal. Cepalstat
+
+__Referencia bibliográfica__ Cepal
+
+
+
+# Mujeres alcaldesas y concejalas electas {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Mujeres alcaldesas y concejalas electas__
+
+```{r}
+db2_1 <- melt(db2, id="year")
+db2_1$variable <- ifelse(db2_1$variable=="pol_3", "Alcaldesas", "Concejales")
+g3 <- ggplot(data = db2_1, aes(x = year, y = value, group = variable, 
+                             color = variable,
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "número de autoridades", caption = "Fuente: INE.", color = "")
+ggplotly(g3, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Mujeres alcaldesas y concejalas electas
+
+__Definición:__ Porcentaje de mujeres electas como alcaldesas o como concejales para un periodo de gobierno local
+
+__Metodología de cálculo:__
+
+$$PMUJE^{g}_{t} =\dfrac{MUJE^{g}_{t}}{TOTE^{g}_t}*100 $$
+
+Donde:
+
+- $PMUJE^{g}_{t}$: Porcentaje de autoridades electas para la función $g$ en el año $t$ que son mujeres.
+
+- $MUJE^{g}_{t}$: Número de autoridades electas para la función $g$ en el año $t$ que son mujeres.
+
+- $TOTE^{g}_t$: Número de autoridades electas para la función $g$ en el año $t$
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x"\% de las autoridades electas en la función $g$ son mujeres.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Estadísticas de la Cepal. Cepalstat
+
+__Referencia bibliográfica__ Cepal
+
+
+# Número de personas con alguna discapacidad {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Número de personas con alguna discapacidad__
+
+```{r}
+db3_1 <- melt(db3, id="year")
+db3_1$variable <- ifelse(db3_1$variable=="dis_1", "Total", ifelse(db3_1$variable=="dis_2", "0-14 años", ifelse(db3_1$variable=="dis_3", "15-59 años", "Más de 60 años")))
+db3_1$year <- as.character(db3_1$year)
+g4 <- ggplot(data = db3_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Número: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_y_continuous(labels = comma) +  
+  scale_x_discrete(limits = c("2012", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Número de trabajadores en el sector", caption = "Fuente: INE.", color = "")
+ggplotly(g4, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Número de personas con alguna discapacidad
+
+__Definición:__ Número total de personas que cuentan con algún impedimento, limitación o dificultad permanente en:
+
+-Ver aún con uso de anteojos
+
+-Hablar o comunicarse aún con un lenguaje de señas u otro medio de comunicación.
+
+-Caminar y subirgradas aún con el uso de dispositivos de apoyo.
+
+-Recordar o concentraese aún bajo el uso de medicamentos o tratamiento.
+
+-Autocuidado personal (vestirse, bañarse, comer u otros)
+
+-Razonar, aprender, comprender la realidad o tiene alteraciones o transtornos mentales aún estando con tratamiento u medicación.
+
+Se considera que una persona tiene un nivel de discapacidad si presenta mucha dificultad o no puede realizar alguna de las actividades mencionadas.
+
+__Metodología de cálculo:__
+
+$$TDIS_{t} =\sum_{i=1}^{N} PDIS_{i} $$
+
+Donde:
+
+- $TDIS_{t}$: Número total de personas que cuentan con alguna discapacidad en el año $t$.
+
+- $\sum_{i=1}^{N} PDIS_{i}$: Sumatoria total de personas que cuentan con alguna discapacidad en el año $t$.
+
+__Unidad de medida:__ Número de personas
+
+__Interpretación:__ En el año $t$ existían "x" personas que contaban con un impedimento, limitación o discapacidad.
+
+__Nivel de desagregación:__ Nacional - Cohortes de edad
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2012-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+# Población con discapacidad, por tipo de discapacidad {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Población con discapacidad, por tipo de discapacidad__
+
+```{r}
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="dis_5", "Única", "Múltiple")
+db4_1$year <- as.character(db4_1$year)
+g5 <- ggplot(data = db4_1, aes(x = year, y = value, fill = variable, 
+                             
+                            text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar( stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2012", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE", fill="")
+ggplotly(g5, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo de energía </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Población con discapacidad, por tipo de discapacidad.
+
+__Definición:__ Se considera que una persona presenta una discapacidad si presenta mucha dificultad o no puede realizar alguna de las siguientes actividades:
+
+-Ver aún con uso de anteojos
+
+-Hablar o comunicarse aún con un lenguaje de señas u otro medio de comunicación.
+
+-Caminar y subirgradas aún con el uso de dispositivos de apoyo.
+
+-Recordar o concentraese aún bajo el uso de medicamentos o tratamiento.
+
+-Autocuidado personal (vestirse, bañarse, comer u otros)
+
+-Razonar, aprender, comprender la realidad o tiene alteraciones o transtornos mentales aún estando con tratamiento u medicación.
+
+Se considera que una persona presenta una discapacidad única si presenta dificultad en sólo una de las actividades anteriormente mencionadas, caso contrario la persona presenta una dificultad múltiple.
+
+__Metodología de cálculo:__
+
+$$PPER^{g}_{t} =\dfrac{PER^{g}_{t}}{TDIS_t}*100 $$
+
+Donde:
+
+- $PPER^{g}_{t}$: Porcentaje de personas que presenta un tipo de discapacidad $g$ en el año $t$.
+
+- $PER^{g}_{t}$: Número de personas que presenta un grado de discapacidad $g$ en el año $t$.
+
+- $TDIS_t$: Población total que pesenta una discapacidad en el año $t$.
+
+-Tipo de discapacidad ($g$): Única, múltiple.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ x\% de la población con discapacidad presentaba un tipo de discapacidad $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2012-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+# Relación de dependencia {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Relación de dependencia__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="dep_1", "Adultos mayores", ifelse(db5_1$variable=="dep_2", "Menores de 15 años", "Total"))
+db5_1$year <- as.character(db5_1$year)
+g6 <- ggplot(data = db5_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Valoe: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_y_continuous(labels = comma) +  
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Relación de dependencia", caption = "Fuente: INE.", color = "")
+ggplotly(g6, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Población </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Relación de dependencia
+
+__Definición:__ Medida demográfica que expresa la relación de la población, en términos de edad, entre las personas potencialmente activas y las personas potencialemente dependientes (inactivas). Se distingue tres medidas:
+
+-Relación de dependencia total: Cociente entre la suma de los grupos de población potencialmente dependientes (Población de 0-14 años de edad más la población mayor o igual a 65 años) y la población entre 15 y 59 años de edad.
+
+-Relación de dependencia de niños: Cociente entre la población de 0-14 años de edad y la población entre 15 y 59 años de edad.
+
+-Relación de dependencia de adultos mayores: Cociente entre la población mayor o igual a 60 años de edad y la población entre 15 y 59 años de edad.
+
+__Metodología de cálculo:__
+
+$$RDEP^{g}_{t} =\dfrac{PT^{g}_{t}}{TPOB^{15-59}(t)}*100 $$
+
+Donde:
+
+- $RDEP^{g}_{t}$: Relación de dependencia del grupo de población $g$ en el año $t$.
+
+- $PO^{g}_{t}$: Total de la población del grupo de población $g$ en el año $t$.
+
+- $PET^{g}(t)$: Total de la población entre 15 y 59 años de edad en el año $t$.
+
+-Grupo de población ($g$): Total, niños, adultos mayores.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ la relación de dependencia entre el grupo de población $g$ y la población entre 15 y 59 años es de "x"\%, es decir existen "x" personas del grupo de población $g$ porc ada 100 personas de la población entre 15 y 59 años.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+# Esperanza de vida saludable {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Esperanza de vida saludable__
+
+```{r}
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="esp_1", "Total", ifelse(db6_1$variable=="esp_2", "Hombres", "Mujeres"))
+db6_1$year <- as.character(db6_1$year)
+g7 <- ggplot(data = db6_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2005", "2010", "2015", "2016")) +  theme_gray() + 
+  labs(x = "Años", y = "Años", caption = "Fuente: INE.", color = "")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Esperanza de vida saludable
+
+__Definición:__ Número promedio de años que se espera que una persona puede vivir en codición de  "salud plena", es decir, se descuentan el número de años que no se vive en salud plena debido a enfermedades y/o lesiones.
+
+__Metodología de cálculo:__ Estimación basada en el ratio per cápita de los años de vida perdidos debido a alguna discapacidad, ajustada por comorbilidades (WHO).
+
+Donde:
+
+- $TPO^{g}_{t}$: Porcentaje de la población en edad de trabajar que se encuentra empleada según género $g$ en el año $t$.
+
+- $PO^{g}_{t}$: Población ocupada según género $g$ en el año $t$.
+
+- $PET^{g}(t)$: Población en edad de trabajar según género $g$ en el año $t$.
+
+-Género ($g$): Mujeres, hombres.
+
+__Unidad de medida:__ Años de vida saludables
+
+__Interpretación:__ En el año $t$ se espera que las personas vivan "x" años en una condición de salud plena. 
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Cada 5 años
+
+__Fuente de datos:__ Organización Mundial de la Salud (OMS)
+
+__Referencia bibliográfica__ Organización Mundial de la Salud (OMS)
+
+
+
+# Asistencia educativa de las personas indígenas {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Asistencia educativa de las personas indígenas entre 6 y 22 años__
+
+```{r}
+db7_1 <- melt(db7, id="year")
+db7_1$variable <- ifelse(db7_1$variable=="ind_1", "Total", ifelse(db7_1$variable=="ind_2", "Mujeres", "Hombres"))
+db7_1$year <- as.character(db7_1$year)
+g8 <- ggplot(data = db7_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g8, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Asistencia escolar de las personas indígenas entre 6 y 22 años
+
+__Definición:__ Número total de personas entre 6 y 22 años que se autoidentifican como indígenas que asisten aalgún establecimiento educativo, de la educación regular, educación superior, terciaria u otro.
+
+__Metodología de cálculo:__
+
+$$PPI_{t} =\dfrac{TPI_{t}}{TI(t)}*100 $$
+
+Donde:
+
+- $PPI_{t}$: Porcentaje de la población indígena entre 6 y 22 años de edad que continua sus estudios en el año $t$.
+
+- $TPI_{t}$: Total de la población indígena entre 6 y 22 años de edad que continua sus estudios en el año $t$.
+
+- $TI(t)$: Total de la población indígena entre 6 y 22 años de edad en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x"\% de la población indígena entre 6 y 22 años de edad continua asistiendo y estudiando.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+# Razones del abandono de los estudios, hombres {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Razones del abandono de los estudios, según género__
+
+```{r}
+db9_1 <- melt(db9, id="desag")
+db9_1$variable <- ifelse(db9_1$variable=="hombre_1", "La familia se lo impidió", ifelse(db9_1$variable=="hombre_2", "Comenzó a trabajar", ifelse(db9_1$variable=="hombre_3", "Falta de recursos económicos", "Trabajo doméstico y de cuidado")))
+g9 <- ggplot(data = db9_1, aes(x = desag, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", desag, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Cohortes de edad", y = "Porcentaje", caption = "Fuente: Oxfam.", fill = "")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Razón </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Razones del abandono de los estudios, según género 
+
+__Definición:__ Población que declara haber abandonado los estudios debido a alguna de las siguientes razones:
+
+-La familia se lo impidió
+
+-Comenzó a trabajar
+
+-Falta de recursos económico/ausencia de servicios de educación
+
+-Trabajo doméstico y de cuidado
+
+__Metodología de cálculo:__
+
+$$PAB^{g}_{t} =\dfrac{TAB^{g}_{t}}{PT^{g}(t)}*100 $$
+
+Donde:
+
+- $PAB^{g}_{t}$: Porcentaje de la población que abandonó sus estudios por la razón $t$ según género $g$ que pertenece al cohorte de edad $e$.
+
+- $TAB^{g}_{t}$: Total de la población que abandonó sus estudios por la razón $t$ según género $g$ que pertenece al cohorte de edad $e$.
+
+- $PT^{g}(t)$: Población total según género $g$ que pertenece al cohorte de edad $e$.
+
+-Género ($g$): Mujeres, hombres.
+
+-Cohorte de edad ($e$): 18-25 años de edad, 26-40 años de edad, 41-59 años de edad, 60 o más años de edad.
+
+-Razón ($t$): La familia se lo impidió, comenzó a trabajar, falta de recursos económico, ausencia de servicios de educación, trabajo doméstico y de cuidado
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ "x"\% de la población perteneciente al cohorte de edad $e$ según género $g$ abandonó sus estudios por la razón $t$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ 2018, única
+
+__Fuente de datos:__ Oxfam y Ciudadania
+
+__Referencia bibliográfica__ Oxfam
+
+
+
+# Razones del abandono de los estudios, mujeres {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Razones del abandono de los estudios, según género__
+
+```{r}
+db10_1 <- melt(db10, id="desag")
+db10_1$variable <- ifelse(db10_1$variable=="mujer_1", "La familia se lo impidió", ifelse(db10_1$variable=="mujer_2", "Comenzó a trabajar", ifelse(db10_1$variable=="mujer_3", "Falta de recursos económicos", "Trabajo doméstico y de cuidado")))
+g10 <- ggplot(data = db10_1, aes(x = desag, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", desag, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Cohortes de edad", y = "Porcentaje", caption = "Fuente: Oxfam.", fill = "")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Razón </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Razones del abandono de los estudios, según género 
+
+__Definición:__ Población que declara haber abandonado los estudios debido a alguna de las siguientes razones:
+
+-La familia se lo impidió
+
+-Comenzó a trabajar
+
+-Falta de recursos económico/ausencia de servicios de educación
+
+-Trabajo doméstico y de cuidado
+
+__Metodología de cálculo:__
+
+$$PAB^{g}_{t} =\dfrac{TAB^{g}_{t}}{PT^{g}(t)}*100 $$
+
+Donde:
+
+- $PAB^{g}_{t}$: Porcentaje de la población que abandonó sus estudios por la razón $t$ según género $g$ que pertenece al cohorte de edad $e$.
+
+- $TAB^{g}_{t}$: Total de la población que abandonó sus estudios por la razón $t$ según género $g$ que pertenece al cohorte de edad $e$.
+
+- $PT^{g}(t)$: Población total según género $g$ que pertenece al cohorte de edad $e$.
+
+-Género ($g$): Mujeres, hombres.
+
+-Cohorte de edad ($e$): 18-25 años de edad, 26-40 años de edad, 41-59 años de edad, 60 o más años de edad.
+
+-Razón ($t$): La familia se lo impidió, comenzó a trabajar, falta de recursos económico, ausencia de servicios de educación, trabajo doméstico y de cuidado
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ "x"\% de la población perteneciente al cohorte de edad $e$ según género $g$ abandonó sus estudios por la razón $t$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ 2018, única
+
+__Fuente de datos:__ Oxfam y Ciudadania
+
+__Referencia bibliográfica__ Oxfam
+
+
+
+
+
+# Tiempo dedicado al cuidado y tareas domésticas, hombres {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Tiempo dedicado al cuidado y tareas domésticas, según género__
+
+```{r}
+db11_1 <- melt(db11, id="desag")
+db11_1$variable <- ifelse(db11_1$variable=="hombre_5", "Cuidado de niñas/os y adolescentes", "Trabajo doméstico ")
+g11 <- ggplot(data = db11_1, aes(x = desag, y = value, fill = variable, 
+                             
+                             text = paste("Edad: ", desag, "<br>Tiempo: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = position_dodge()) + 
+  scale_y_continuous(breaks = seq(0,10,by = 2)) +
+  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Cohortes de edad", y = "Porcentaje", caption = "Fuente: Oxfam.", fill = "")
+ggplotly(g11, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Actividad </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tiempo dedicado al cuidado y tareas domésticas, según género
+
+__Definición:__ Tiempo dedicado en horas por día al trabajo doméstico y al cuidado de niños, niñas y adolescentes.
+
+__Metodología de cálculo:__
+
+$$TTD^{g}_{t} =\dfrac{\sum_{i=1}^{N} hh^{g}_{i}}{POB^{g}_{t}}*100 $$
+
+Donde:
+
+- $TTD^{g}_{t}$: Tiempo promedio dedicado a la actividad $t$ según género $g$ y perteneciente al cohorte $e$.
+
+- $\sum_{i=1}^{N} hh^{g}_{i}$: Sumatoria del tiempo dedicado a la actividad $t$ según género $g$ y perteneciente al cohorte $e$.
+
+- $POB^{g}_{t}$: Población total según género $g$ en la actividad $t$ y perteneciente al cohorte $e$.
+
+-Género ($g$): Mujeres, hombres.
+
+-Actividad ($t$): Trabajo doméstico, cuidado de niños/as y adolescentes.
+
+-Cohorte de edad ($e$): 18-25 años de edad, 26-40 años de edad, 41-59 años de edad, 60 o más años de edad.
+
+__Unidad de medida:__ Tiempo en horas al día
+
+__Interpretación:__ El tiempo promedio al día dedicado a la actividad $t$ según género $g$ y cohorte de edad $e$ es "x". 
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ 2018, única
+
+__Fuente de datos:__ Oxfam y Ciudadania
+
+__Referencia bibliográfica__ Oxfam
+
+
+# Tiempo dedicado al cuidado y tareas domésticas, mujeres {data-navmenu="Igualdad-inclusión" data-icon="fa-list"}
+
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Tiempo dedicado al cuidado y tareas domésticas, según género__
+
+```{r}
+db12_1 <- melt(db12, id="desag")
+db12_1$variable <- ifelse(db12_1$variable=="mujer_5", "Cuidado de niñas/os y adolescentes", "Trabajo doméstico ")
+g12 <- ggplot(data = db12_1, aes(x = desag, y = value, fill = variable, 
+                             
+                             text = paste("Edad: ", desag, "<br>Tiempo: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = position_dodge()) + 
+  scale_y_continuous(breaks = seq(0,10,by = 2)) +
+  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Cohortes de edad", y = "Porcentaje", caption = "Fuente: Oxfam.", fill = "")
+ggplotly(g12, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Actividad </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Tiempo dedicado al cuidado y tareas domésticas, según género
+
+__Definición:__ Tiempo dedicado en horas por día al trabajo doméstico y al cuidado de niños, niñas y adolescentes.
+
+__Metodología de cálculo:__
+
+$$TTD^{g}_{t} =\dfrac{\sum_{i=1}^{N} hh^{g}_{i}}{POB^{g}_{t}}*100 $$
+
+Donde:
+
+- $TTD^{g}_{t}$: Tiempo promedio dedicado a la actividad $t$ según género $g$ y perteneciente al cohorte $e$.
+
+- $\sum_{i=1}^{N} hh^{g}_{i}$: Sumatoria del tiempo dedicado a la actividad $t$ según género $g$ y perteneciente al cohorte $e$.
+
+- $POB^{g}_{t}$: Población total según género $g$ en la actividad $t$ y perteneciente al cohorte $e$.
+
+-Género ($g$): Mujeres, hombres.
+
+-Actividad ($t$): Trabajo doméstico, cuidado de niños/as y adolescentes.
+
+-Cohorte de edad ($e$): 18-25 años de edad, 26-40 años de edad, 41-59 años de edad, 60 o más años de edad.
+
+__Unidad de medida:__ Tiempo en horas al día
+
+__Interpretación:__ El tiempo promedio al día dedicado a la actividad $t$ según género $g$ y cohorte de edad $e$ es "x". 
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ 2018, única
+
+__Fuente de datos:__ Oxfam y Ciudadania
+
+__Referencia bibliográfica__ Oxfam

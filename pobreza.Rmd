@@ -1,0 +1,669 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+#runtime: shiny
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+#library(wordcloud)
+library(tm)
+library(dplyr)
+library(ggplot2)
+library(httr)
+library(plotrix)
+library(shiny)
+library(shinyWidgets)
+library(ggwordcloud)
+library(gridExtra)
+library(ggthemes)
+library(tidytext)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape)
+library(scales)
+#base de datos
+#db <- as.data.frame(read_excel("D:/ARU/PPI USAID/_data/indic_educacion.xlsx", range = "A1:I41", col_names = T), stringsAsFactor = T)
+#db1 <- db %>% filter(year >= 2011)
+#db2 <- db %>% filter(year>=2006 & year <= 2018 & primaria == "Primaria")
+#setwd("D:\\ARU_Sergio\\usaid\\_data")
+#db <- as.data.frame(read_excel("data_pobreza.xlsx", range = "A1:AE21", col_names = T), stringsAsFactor = T)
+#save(db, file = "pobreza.RData")
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/pobreza.RData"))
+
+db1 <- db %>% select(year, multid_1, multid_2,)
+db2 <- db %>% select(year, multid_4, multid_5, multid_6,)
+db3 <- db %>% select(year, mon_1, mon_2,)
+db4 <- db %>% select(year, mon_3, mon_4)
+db5 <- db %>% select(year, cons_1, cons_2, cons_3,)
+db6 <- db %>% select(year, agua, sanea, gas,)
+db8 <- db %>% select(year, cred_1, cred_2, cred_3, cred_4, cred_5, cred_6, cred_7, cred_8, cred_9,)
+db9 <- db %>% select(year, trab_1, trab_2, trab_3, trab_4,)
+
+```
+
+# Pobreza multidimensional {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Incidencia e intensidad de la pobreza multidimensional__
+
+```{r}
+db1_1 <- melt(db1, id="year")
+db1_1$variable <- ifelse(db1_1$variable=="multid_1", "Incidencia (H)", "Intensidad (A)")
+db1_1$year <- as.character(db1_1$year)
+g1 <- ggplot(data = db1_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Indicador </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Pobreza multidimensional
+
+__Definición:__ Evalúa la pobreza desde un enfoque multidimensional concentrandose en medir el bienestar de las personas desde un enfoque de oportunidades, derechos u otros, de manera que se capture una multidimensionalidad del bienestar.
+
+Para la medición del IPM se consideraron tres dimensiones que forman parte del IPM calculado por Oxford Poverty and Human Development (OPHI) que se encuentran conformados por los siguientes indicadores:
+
+Salud. - Seguro de salud, parto institucional.
+
+Educación. - Escolaridad, asistencia escolar
+
+Vivienda y servicios. - Electricidad, saneamiento adecuado, uso de combustibles adecuados, fuente de agua mejorada, materiales en el piso de la vivienda y tenencia de activos.
+
+Para cada uno de estos indicadores se evalúa si el hogar se encuentra privado en base normas o umbrales que permiten distinguir efectivamente la existencia de una privación.
+
+Para el cálculo del IPM se sigue el método propuesto por Alkire y Foster (2011), el cual sigue un enfoque de corte dual. Es dual porque se tienen dos puntos de corte: el primero es un punto de corte unidimensional, es decir,  uno para cada indicador. El segundo punto de corte es el umbral de pobreza, denominado "k", el cual define el número de hogares que son considerados coo pobres multidimensionales. Al igual que los umbrales unidimensionales, este umbral también es normativo, flexible y responde a las necesidades de cada país. 
+
+Para poder contabilizar el número de indicadores en el cual un hogar se encuentra privado es necesario establecer un esquemas de pesos, el cual otorga un peso relativo, o nivel de importancia, a cada dimensión e indicador. 
+
+Para el cálculo del presente IPM se da la misma importancia a cada dimensión (cada una tiene un peso de 1/3) y dentro de cada dimensión cada indicador también tiene un peso similar. Se define el umbral "k" igual al 33\% del total de los indicadores considerados en la medición, es decir, un hogar es pobre multidimensional si tiene una privación en 33\% o más del total de los indicadores. Además, se asume que si un hogar es pobre multidimensional, todos los miembros del mismo se encuentran en dicha situación; de esta manera, se evalua el número de personas que son pobres mutltidimensionales.
+
+
+Para establecer el nivel de pobreza en un sociedad se agrega los resultados para cada unidad de observación, en este caso personas, y se calculan dos indicadores:
+
+-Incidencia de pobreza (H): Mide el número de personas que son pobre multidimensionales.
+
+-Intensidad de la pobreza (A): Mide el nivel de privaciones promedio que experimentan las personas pobres multidimensionales.
+
+__Metodología de cálculo:__
+
+Incidencia de pobreza (H):
+
+$$H_{t} =\dfrac{\sum_{i=1}^{N} p_{k}}{POB_{t}}*100 $$
+
+Intensidad de pobreza (A):
+
+$$A_{t} =\dfrac{\sum_{i=1}^{Q} c_{i}(k)}{Q_{t}}*100 $$
+
+Donde:
+
+- $H_{t}$: Porcentaje de la pooblación que es pobre multidimensional en el año $t$.
+
+- $\sum_{i=1}^{N} p_{k}$: Sumatoria de la población que es pobre multidimensional en el año $t$.
+
+- $POB_{t}$: Total de la población en el año $t$.
+
+- $A_{t}$: Porcentaje promedio de privaciones que experimentan las personas pobres en el año $t$.
+
+- $\sum_{i=1}^{Q} c_{i}(k)$: Sumatoria de las privaciones de la población pobre multidimensional en el año $t$.
+
+- $Q_{t}$: Total de la población pobre multidimensional en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ el porcentaje de personas que son pobres multidimensionales son "x"\% y el nivel promedio de privaciones que experimentan los pobres multidimensionales es de "y"\%.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2006-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ OPHI
+
+
+# Incidencia ajustada de la pobreza multidimensional {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Incidencia ajustada de la pobreza multidimensional__
+
+```{r}
+db$year <- as.character(db$year)
+g2 <- ggplot(data = db, aes(x = year, y = multid_3, 
+                             text = paste("Año: ", year, "<br>Valor: ", round(multid_3,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c("2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "IPM-M0", caption = "Fuente: INE.")
+ggplotly(g2, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Incidencia ajustada de la pobreza multidimensional.
+
+__Definición:__ Es el resultado del producto entre la incidencia de la pobreza multidimensional (H) y la intensidad de la pobreza multidimensional (A).
+
+Este indicador responde tanto a cambios en el número de personas como a cambios en el número de privaciones que experimentan las personas pobres. Por lo tanto, permite ver avances en materia de oportunidades, es decir, mientras el valor sea más bajo se experimenta mejoras en al condición de vida de las persoans pobres ya sea porque estos salen de la pobreza o porque el número de privaciones que experimentaban disminuye. 
+
+__Metodología de cálculo:__
+
+$$M_{o}(t) =H*A = \dfrac{\sum_{i=1}^{Q} c_{i}(k)}{POB_{t}} $$
+
+Donde:
+
+- $M_{o}(t)$: Incidencia ajustada de la pobreza. 
+
+- $\sum_{i=1}^{Q} c_{i}(k)$: Sumatoria de las privaciones de la población pobre multidimensional en el año $t$.
+
+- $POB_{t}$: Total de la población en el año $t$.
+
+__Unidad de medida:__ Adimensional
+
+__Interpretación:__ En el año $t$ el valor de la indicdencia ajustada es de "x".
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2006-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ OPHI
+
+
+# Contribución de las dimensiones al IPM-M0 {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Contribución de las dimensiones al IPM-M0__
+
+```{r}
+db2_1 <- melt(db2, id="year")
+db2_1$variable <- ifelse(db2_1$variable=="multid_4", "Salud", ifelse(db2_1$variable=="multid_5", "Educación", "Vivienda y servicios"))
+db2_1$year <- as.character(db2_1$year)
+g3 <- ggplot(data = db2_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c("2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", fill = "")
+ggplotly(g3, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Dimensión </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Contribución de las dimensiones al IPM-M0
+
+__Definición:__ La medida de pobreza multidimensional puede expresarse como la suma ponderada de las privaciones en cada dimensión; este resultado se denomina conteo censurado en cada indicador, que se define como el porcentaje de la población que es pobre multidimensional y simultáneamente se encuentra privado en el indicador.
+
+Con esta suma se puede conocer la descomposición por dimensiones o indicadores de la medida de pobreza y su aporte de cada una al nivel de pobreza.
+
+__Metodología de cálculo:__
+
+$$CON_{j}(t) = w_{j}*\dfrac{\sum_{i=1}^{n} w_{j}*g^{0}_{ij}(k)}{n*M_{0}} $$
+
+Donde:
+
+- $TPO^{g}_{t}$: Porcentaje de la población en edad de trabajar que se encuentra empleada según género $g$ en el año $t$.
+
+-$w_{j}$: Ponderación de cada dimensión $j$.
+
+- $w_{j}*g^{0}_{ij}(k)$: Matriz de privación ponderada censurada en el año $t$.
+
+- $n$: Población total en el año $t$.
+
+-$M_{0}$: Incidencia ajustada de la pobreza multidimensional.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ la contribución de al dimensión $j$ a la incidencia ajustada es del "x"\%.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2006-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ OPHI
+
+
+# Incidencia de la pobreza monetaria {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Incidencia de la pobreza monetaria__
+
+```{r}
+db3_1 <- melt(db3, id="year")
+db3_1$variable <- ifelse(db3_1$variable=="mon_1", "Pobreza moderada", "Pobreza extrema")
+db3_1$year <- as.character(db3_1$year)
+g4 <- ggplot(data = db3_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g4, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Incidencia </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Incidencia de la pobreza monetaria
+
+__Definición:__ Número de hogares cuyo ingreso per-cápita es inferior a la línea de pobreza monetaria oficial moderada y extrema. Por lo tanto, es una medida de pobreza monetaria.
+
+Se considera a una persona como pobre moderada si no puede satisfacer necesidades básicas alimentarias y no alimentarias.
+
+Se considera a una persona como pobre extrema si no puede satisfacer necesidades básicas alimentarias.
+
+Siguiendo los índices de pobreza de Foster-Greer y Thorbecke (FGT) este se define como el primer indicador FGT-0.
+
+__Metodología de cálculo:__
+
+$$P_{0} =\dfrac{q(t)}{POB(t)}*100 $$
+
+Donde:
+
+- $P_{0}$: Porcentaje de la población que es pobre moderado o extremo en el año $t$.
+
+- $q(t)$: Población pobre moderada o extrema en el año $t$.
+
+- $POB(t)$: Población total en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ x\% de la población es pobre moderada (extrema)
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+# Brecha de la pobreza monetaria {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Brecha de la pobreza monetaria__
+
+```{r}
+db4_1 <- melt(db4, id="year")
+db4_1$variable <- ifelse(db4_1$variable=="mon_3", "Pobreza moderada", "Pobreza extrema")
+db4_1$year <- as.character(db4_1$year)
+g5 <- ggplot(data = db4_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.", color = "")
+ggplotly(g5, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Brecha </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Brecha de la pobreza monetaria
+
+__Definición:__ Brecha promedio del ingreso de las personas pobres respecto a la línea de pobreza expresado como porcentaje de la línea de pobreza.
+
+La medida refleja la profundidad de la pobreza, es decir, que tan pobres son los pobres y cuanto de ingreso necesitan para que salgan de la pobreza
+
+
+Siguiendo los índices de pobreza de Foster-Greer y Thorbecke (FGT) este se define como el segndo indicador FGT-1.
+
+__Metodología de cálculo:__
+
+$$P_{1} =\dfrac {1}{n} \sum_{n=1}^{q}\dfrac{z(t)-y_{i}(t)}{z(t)} $$
+
+Donde:
+
+- $P_{1}$: Porcentaje de la población que es pobre moderado o extremo en el año $t$.
+
+- $n$: Población total en el año $t$.
+
+- $q$: Número de personas en el año $t$.
+
+- $z$: Línea de pobreza moderada o extrema en el año $t$.
+
+- $y_{i}(t)$: Ingreso del hogar per cápita de la personas $i$ en el año $t$.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ la brecha de pobreza extrema y moderada es del x\%.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+# Empleados en el sector de la construcción, según género {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Empleados en el sector de la construcción, según género__
+
+```{r}
+db5_1 <- melt(db5, id="year")
+db5_1$variable <- ifelse(db5_1$variable=="cons_1", "Total", ifelse(db5_1$variable=="cons_2", "Mujeres", "Hombres"))
+db5_1$year <- as.character(db5_1$year)
+g6 <- ggplot(data = db5_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Número: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_y_continuous(labels = comma) +  
+  scale_x_discrete(limits = c("2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Número de trabajadores en el sector", caption = "Fuente: INE.", color = "")
+ggplotly(g6, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Empleados en el sector de la construcción, según género
+
+__Definición:__ Número de personas que, según la actividd que realiza el establecimiento donde trabajan, pertenecen al sector de la construcción.
+
+__Metodología de cálculo:__
+
+$$PC_{1} = \sum_{i=1}^{N} POBC_{i}(t)  $$
+
+Donde:
+
+- $PC_{1$: Número de empleados que trabajan en el sector de la construcción en el año $t$.
+
+- $\sum_{i=1}^{N} POBC_{i}(t)$: Sumatoria de la población ocupada que trabaja en el sector de la construcción en el año $t$.
+
+__Unidad de medida:__ Número de trabajadores
+
+__Interpretación:__ En el año $t$ "x" empleados trabajaban enel sector de la construcción.
+
+__Nivel de desagregación:__ Nacional - Género
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
+
+# Cobertura de servicios básicos {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Cobertura de servicios básicos__
+
+```{r}
+db6_1 <- melt(db6, id="year")
+db6_1$variable <- ifelse(db6_1$variable=="agua", "Agua mejorada", ifelse(db6_1$variable=="sanea", "Saneamiento adecuado", "Gas natural (por red)"))
+db6_1$year <- as.character(db6_1$year)
+g7 <- ggplot(data = db6_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Cobertura: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje de hogares", caption = "Fuente: INE.", color = "")
+ggplotly(g7, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Servicio </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Cobertura de servicios básicos
+
+__Definición:__ La cobertura de los servicios básicos que se consideran los siguientes:
+
+-Acceso a fuente mejorada de agua: Hogares que utilizan una fuente de agua potable mejorada (agua corriente
+en las viviendas, fuera o dentro del lote de la vivenda; fuentes o grifos públicos; pozos entubados; manantiales protegidos; agua entregada o envasada), disponible en todo momento y exenta de contaminación fecal
+
+-Saneamiento adecuado: Hogares que tienen acceso a una instalación de saneamiento mejorada en el hogar y que, además, el baño/water o letrina es de uso exclusivo del hogar, respecto a todos los hogares. Las instalaciones de saneamiento mejorada incluyen: vacío de los inodoros en los sistema de alcantarillado, fosas sépticas o letrinas de pozo.
+
+-Gas domiciliario: Hogares que tienen acceso a gas natural domiciliario en su hogar, respecto a todos los
+hogares.
+
+__Metodología de cálculo:__
+
+$$SERV^{g}_{t} =\dfrac{CS^{g}_{t}}{THOG(t)}*100 $$
+
+Donde:
+
+- $SERV^{g}_{t}$: Porcentaje de hogares que cuentan con acceso el servicio $g$ en el hogar en el año $t$.
+
+- $CS^{g}_{t}$: Hogares que cuentan con acceso el servicio $g$ en el hogar en el año $t$.
+
+- $THOG(t)$: Total de hogares en el año $t$.
+
+-Servicios ($g$): Agua mejorada, saneamiento adecuado, gas domiciliario.
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ x\% de los hogares cuenta con acceso al servicio $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2000-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Objetivos del Desarrollo Sostenible (ODS)
+
+
+# Acceso a internet en en el hogar {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Acceso a internet en en el hogar__
+
+```{r}
+db$year <- as.character(db$year)
+g8 <- ggplot(data = db, aes(x = year, y = inter, 
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(inter,2) ))) + 
+  geom_bar(fill = "#00AFBB", stat = "identity", position = position_dodge()) + 
+  scale_x_discrete(limits = c("2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + 
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: INE.")
+ggplotly(g8, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Acceso a internet en el hogar
+
+__Definición:__ Número de hogares que cuentan con un servicio de internet en el hogar.
+
+__Metodología de cálculo:__
+
+$$AINT^{g}_{t} =\dfrac{CI^{g}_{t}}{THOG(t)}*100 $$
+
+Donde:
+
+- $AINT^{g}_{t}$: Porcentaje de hogares que cuentan con acceso a internet en el hogar en el año $t$.
+
+- $CI^{g}_{t}$: Hogares que cuentan con acceso a internet en el hogar en el año $t$.
+
+- $THOG(t)$: Total de hogares en el año $t$.
+
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ x\% de los hogares cuenta con acceso al servicio $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2005-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ Objetivos del Desarrollo Sostenible (ODS)
+
+
+
+
+# Cartera de créditos por sectores económico {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Cartera de créditos por sectores económico__
+
+```{r}
+db8_1 <- melt(db8, id="year")
+db8_1$variable <- ifelse(db8_1$variable=="cred_1", "Agricultura y Ganadería", ifelse(db8_1$variable=="cred_2", "Caza, Silvicultura y Pesca", ifelse(db8_1$variable=="cred_3", "Extracción de Petróleo Crudo y Gas Natural", ifelse(db8_1$variable=="cred_4", "Minerales Metálicos y No Metálicos", ifelse(db8_1$variable=="cred_5", "Industria Manufacturera", ifelse(db8_1$variable=="cred_6", "Producción y Distribución de Energía Eléctrica y Gas", ifelse(db8_1$variable=="cred_7", "Construcción", ifelse(db8_1$variable=="cred_8", "Turiismo", "Producción intelectual"))))))))
+g9 <- ggplot(data = db8_1, aes(x = year, y = value, fill = variable, 
+                             
+                             text = paste("Año: ", year, "<br>Porcentaje: ", round(value,2) ))) + 
+  geom_bar(stat = "identity", position = "fill") + 
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje", caption = "Fuente: UDAPE.", fill = "")
+ggplotly(g9, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Sector </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Cartera de créditos por sector económico.
+
+__Definición:__ Conjunto de documentos qeu amparan los activos financieros o las operaciones de financiamiento hacia un tercero y que el tenedor de dicho (s) documento (s) o cartera se reserva el derecho de hacer valer las obligaciones estipuladas en su texto.
+
+__Metodología de cálculo:__
+
+$$PCC^{g}_{t} =\dfrac{SEC^{g}_{t}}{TCAR^{g}(t)}*100 $$
+
+Donde:
+
+- $PCC^{g}_{t}$: Porcentaje de la cartera de créditos correspondiente hacia el sector $g$ en el año $t$.
+
+- $SEC^{g}_{t}$: Monto de la cartera de créditos correspondiente al sector $g$ en el año $t$.
+
+- $TCAR^{g}(t)$: Monto total de la cartera de créditos en el año $t$.
+
+-Sector ($g$): 
+
+-Agricultura y ganadería
+-Caza, silvicultura y pesca
+-Construcción
+-Extracción de petróleo crudo y gas natural
+-Industria manufacturera
+-Minerales metálicos y no metálicos
+-Producción intelectual
+-Producción y distribución de enrgía eléctrica y gas
+-Turismo
+
+__Unidad de medida:__ Porcentaje
+
+__Interpretación:__ En el año $t$ "x"\% de la cartera de créditos corresponde al sector $g$.
+
+__Nivel de desagregación:__ Nacional
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Dossier de estadísticas de UDAPE
+
+__Referencia bibliográfica__ AUtoridad de Supervisión del Sistema Financiero (ASFI).
+
+# Trabajo infantil {data-navmenu="Pobreza y desarrollo" data-icon="fa-list"}
+    
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA <br> Trabajo infantil__
+
+```{r}
+db9_1 <- melt(db9, id="year")
+db9_1$variable <- ifelse(db9_1$variable=="trab_1", "Total", ifelse(db9_1$variable=="trab_2", "5 a 9 años", ifelse(db9_1$variable=="trab_3", "10 a 13 años", "14 a 17 años")))
+db9_1$year <- as.character(db9_1$year)
+g10 <- ggplot(data = db9_1, aes(x = year, y = value, group = variable, 
+                             color = variable, 
+                             text = paste("Año: ", year, "<br>Cobertura: ", round(value,2) ))) + geom_line() + geom_point() +
+  scale_x_discrete(limits = c("2000", "2001", "2002", "2005", "2006", "2007", "2008", "2009", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019")) +  theme_gray() + theme(axis.text.x=element_text(angle=90, hjust=0.001)) +
+  labs(x = "Años", y = "Porcentaje de niños", caption = "Fuente: INE.", color = "")
+ggplotly(g10, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Desagregación </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Trabajo infantil
+
+__Definición:__ Número de niños/as y adolescentes (NNAS) menores a 18 años que se encuentran actualmente trabajando.
+
+__Metodología de cálculo:__
+
+$$PNNAS^{g}_{t} =\dfrac{NNAS^{g}_{t}}{TNNAS^{g}(t)}*100 $$
+
+Donde:
+
+- $PNNAS^{g}_{t}$: Porcentaje de NNAS pertenecientes al cohorte de edad $g$ que se encuentran trabajando en el año $t$.
+
+- $NNAS^{g}_{t}$: Número de NNAS pertenecientes al cohorte de edad $g$ que se encuentran trabajando en el año $t$.
+
+- $TNNAS^{g}(t)$: Total de NNAS en el año $t$.
+
+-Cohorte de edad ($g$): 5-17 años (total), 5-9 años, 10-13 años, 14-17 años.
+
+__Unidad de medida:__ Porcentaje de NNAS
+
+__Interpretación:__ En el año $t$ x\% del total de NNAS pertenecientes al cohorte de edad $g$ se encuentran trabajando.
+
+__Nivel de desagregación:__ Nacional - Cohortes de edad
+
+__Periodicidad:__ Anual
+
+__Fuente de datos:__ Encuestas de Hogares 2005-2019. Instituto Nacional de Estadística (INE)
+
+__Referencia bibliográfica__ INE
+
+
