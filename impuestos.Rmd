@@ -1,0 +1,253 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape2)
+library(scales)
+library(stringr)
+library(tidyverse)
+
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/impuestos.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_impuestos.xlsx", range = "A1:AC20", sheet #= "Hoja1", col_names = T), stringsAsFactor = T)
+```
+
+# Recaudación de Renta Interna por tipo de impuesto {data-navmenu="Impuestos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Recaudación de Renta Interna por tipo de impuesto__
+
+```{r}
+db1 <- db %>% select(year, IVA, IT, IEHD, IDH, IUE, OTROS)
+db1 <-  melt(db1, id.vars = "year", measure.vars = c(2:7), variable.name = "impuesto", value.name = "valor")
+
+g1 <- ggplot(data = db1, aes(x = year, y = valor/1000, fill = str_wrap(impuesto, 30), text = paste("Año: ", year, "<br>Valor: ", format(round(valor/1000, 1), nsmall = 1), "millones de<br>bolivianos" ))) + 
+  geom_bar(stat = "identity", position = "stack") +   theme(legend.key.height=unit(1, "cm")) +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2000:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de bolivianos", fill = "")
+ggplotly(g1, tooltip = "text")  %>% layout(legend=list(title=list(text='<b> Tipo de impuesto </b>')), xaxis = list(tickangle = 270))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Recaudación de Renta Interna por tipo de impuesto.
+
+__Definición:__ Total de recaudación interna según Ley 843, por tipo de impuesto en un determinado periodo $t$.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de bolivianos.
+
+__Interpretación:__ En la gestión $t$, se recaudaron $u$, $v$, $w$, $x$, $y$, $z$ millones de bolivianos por concepto de IDH (Impuesto Directo a los Hidrocarburos), IEHD (Impuesto Especial a los Hidrocarburos y sus Derivados), IT (Impuesto a las Transferencias), IUE (Impuesto a las Utilidades de las Empresas), IVA (Impuesto al Valor Agregado) y OTROS (comprende la suma de las recaudaciones por impuestos a: Transferencia Grat. de Bienes, Renta Presunta de Empresas, Consumo Específico, Reg. Complementario al IVA, Utilidades Mineras, Impuesto a las Salidas al Exterior, Regímen Tributario Simplificado, Sistema Tributario Integrado, Propiedad Rural, Regularización Impositiva, Renta Presunta a Propietarios de Bienes, Impuesto a las Transacciones Financieras, Conceptos Varios, Impuesto al JuegoJ/Impuesto a la Participación en Juegos, Impuesto a la venta de Moneda Extranjera), respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis de Políticas Económicas y Sociales (UDAPE), Servicio de Impuestos Nacionales (SIN).
+
+# Recaudación del gravamen arancelario {data-navmenu="Impuestos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Recaudación del gravamen arancelario__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = rgarancelario, text = paste("Año: ", year, "<br>Valor: ", format(round(rgarancelario, 1), nsmall = 1), "millones de<br>bolivianos" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2000:2018)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de bolivianos")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Recaudación del gravamen arancelario.
+
+__Definición:__ Total de la recaudación por concepto de aranceles que se deben pagar para poder importar una mercadería, en un determinado periodo $t$.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de bolivianos.
+
+__Interpretación:__ En la gestión $t$, se recaudaron $x$ millones de boliviamos por concepto del gravamen arancelario.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis de Políticas Económicas y Sociales (UDAPE) y Aduana Nacional de Bolivia (ANB).
+
+# Presión tributaria equivalente {data-navmenu="Impuestos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Evolución de la presión tributaria equivalente, como % del PIB__
+
+```{r}
+db1 <- db %>% filter(year < 2016)
+g1 <- ggplot(data = db1, aes(x = year, y = p_tributariapib, text = paste("Año: ", year, "<br>Valor: ", format(round(p_tributariapib, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2015)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Presión tributaria equivalente, como porcentaje del PIB.
+
+__Definición:__ Se define como la cantidad de recursos que se extrae de la economía por: Ingresos Impositivos Totales, Contribuciones a la Seguridad Social (pensiones y salud públicas), Contribuciones a la Seguridad Social Privadas (pensiones y salud obligatorias) expresado como porcentaje del PIB en un determinado periodo.
+
+__Metodología de cálculo:__ 
+
+$$PTE_t=\dfrac{IT}{PIB_{nominal}}*100$$
+
+- $PTE_t$: Presión Tributaria Equivalente en el periodo $t$.
+
+- $IT_t$: Ingresos tributarios: Ingresos Impositivos Totales + Contribuciones a la Seguridad Social + Contribuciones a la Seguridad Social Privadas, en el periodo $t$.
+
+- $PIB_{nominal}$: Producto Interno Bruto a precios corrientes en el periodo $t$.
+ 
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, la presión tributaria equivalente es el $x$\% del Producto Interno Bruto.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Interamericano de Desarrollo (BID).
+
+__Referencia bibliográfica:__ Banco Interamericano de Desarrollo (BID).
+
+# Presión fiscal equivalente {data-navmenu="Impuestos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Evolución de la presión fiscal equivalente, como % del PIB__
+
+```{r}
+g1 <- ggplot(data = db1, aes(x = year, y = p_fiscalpib, text = paste("Año: ", year, "<br>Valor: ", format(round(p_fiscalpib, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2015)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Presión fiscal equivalente, como porcentaje del PIB.
+
+__Definición:__ Se define como la suma de: Ingresos Impositivos Totales, Contribuciones a la Seguridad Social (pensiones y salud públicas), Contribuciones a la Seguridad Social Privadas (pensiones y salud obligatorias) y los Ingresos por la explotación de recursos naturales, expresado como porcentaje del PIB en un determinado periodo.
+
+__Metodología de cálculo:__ 
+
+$$PFE_t=\dfrac{IFE}{PIB_{nominal}}*100$$
+
+- $PT_t$: Presión fiscal equivalente en el periodo $t$.
+
+- $IFE_t$: Ingresos Fiscales Equivalentes: Ingresos Impositivos Totales + Contribuciones a la Seguridad Social + Contribuciones a la Seguridad Social Privadas + Ingresos por la explotación de recursos naturales, en el periodo $t$.
+
+- $PIB_{nominal}$: Producto Interno Bruto a precios corrientes en el periodo $t$.
+ 
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, la presión fiscal equivalente es el $x$\% del Producto Interno Bruto.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Interamericano de Desarrollo (BID).
+
+__Referencia bibliográfica:__ Banco Interamericano de Desarrollo (BID).
+
+# Ingresos impositivos {data-navmenu="Impuestos" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Evolución de los ingresos impositivos, como % del PIB__
+
+```{r}
+db1 <- db %>% filter(year < 2016)
+g1 <- ggplot(data = db1, aes(x = year, y = y_impositivopib, text = paste("Año: ", year, "<br>Valor: ", format(round(y_impositivopib, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2015)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Ingresos impositivos, como porcentaje del PIB.
+
+__Definición:__ Se define como la cantidad de recursos provenientes de: impuesto a la renta, impuestos generales al consumo, impuestos selectivos, impuestos a la propiedad, impuestos al comercio exterior, otros, recaudación subnacional total  y otros ingresos del Gobierno General en un determinado periodo.
+
+__Metodología de cálculo:__ 
+
+$$II(PIB)_t=\dfrac{RT}{PIB_{nominal}}*100$$
+
+- $II(PIB)_t$: Ingresos impositivos como porcentaje del PIB $t$.
+
+- $RT_t$: Recaudación total por impuesto a la renta, impuestos generales al consumo, impuestos selectivos, impuestos a la propiedad, impuestos al comercio exterior, otros, recaudación subnacional total y otros ingresos del Gobierno General en el periodo $t$.
+
+- $PIB_{nominal}$: Producto Interno Bruto a precios corrientes en el periodo $t$.
+ 
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, los ingresos impositivos representaban el $x$\% del Producto Interno Bruto.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Interamericano de Desarrollo (BID).
+
+__Referencia bibliográfica:__ Banco Interamericano de Desarrollo (BID).

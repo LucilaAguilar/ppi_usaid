@@ -1,0 +1,275 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape2)
+library(scales)
+library(stringr)
+library(tidyverse)
+
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/industria.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_industria.xlsx", range = "A1:G22", sheet = #"Hoja1", col_names = T), stringsAsFactor = T)
+```
+
+# Industria manufacturera {data-navmenu="Industria" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Participación de la industria manufacturera en el PIB__
+
+```{r}
+db1 <- db %>% filter(year < 2020)
+g1 <- ggplot(data = db1, aes(x = year, y = part_ind_pibcorr, text = paste("Año: ", year, "<br>Valor: ", format(round(part_ind_pibcorr, 1), nsmall = 1), "%" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_x_discrete(limits = c(2000:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Participación de la industria manufacturera en el PIB.
+
+__Definición:__ .
+
+__Metodología de cálculo:__
+
+$$PIM_t = \dfrac{PIB(IM)_t}{PIB_t}*100$$
+
+- $PIM_t$: Participación de la industria manufacturera en el Producto Interno Bruto en el periodo $t$.
+
+- $PIB(IM)_t$: Producto Interno Bruto de la Industria Manufacturera en el periodo $t$.
+
+- $PIB_t$: Producto Interno Bruto en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, la participación de la industria manufacturera en el Producto Interno Bruto es de $x$\%.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Volumen físico de la industria manufacturera {data-navmenu="Industria" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Evolución del índice de volumen físico de la industria manufacturera__
+
+```{r}
+db1 <- db %>% filter(year < 2018)
+g1 <- ggplot(data = db1, aes(x = year, y = invofim, text = paste("Año: ", year, "<br>Valor: ", format(round(invofim, 1), nsmall = 1) ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB", size = 3) +
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2000:2017)) + theme_gray() + 
+  labs(x = "Años", y = "")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Índice de volumen físico de la industria manufacturera.
+
+__Definición:__ Mide la evolución de la cantidad de producción de la industria manufacturera en el corto plazo, tanto a nivel general, por grupo de actividad industrial  y  subsectores.
+
+__Metodología de cálculo:__ 
+
+$$INVOFIM_t=\sum_{i=1}^{35}\sum_{j=1}^{n}\dfrac{Q_{ijt}}{Q_{ij0}}W_{ij0}*100$$
+
+$$W_{ij0} = \dfrac{P_{ij0}Q_{ij0}}{\sum_{i=1}^{35}\sum_{j=1}^{n}Q_{ij0}P_{ij0}}$$
+
+- $i$: Grupo de actividad de la industria manufacturera.
+
+- $j$: Producto del grupo de actividad $i$ de la industria manufacturera.
+
+- $INVOFIM_t$: Índice de Volumen Físico de la Industria Manufacturera en el período $t$.
+
+- $Q_{ij0}$: Cantidad producida del producto $j$ en el grupo de actividad $i$ en el periodo base (1990).
+
+- $Q_{ijt}$: Cantidad producida del producto $j$ en el grupo de actividad $i$ en el periodo $t$.
+
+- $P_{ij0}$: Precio del producto $j$ en el grupo de actividad $i$ en el período base (1990).
+
+- $W_{ij0}$: Ponderación del producto $j$ en el grupo de actividad $i$ en el período base (1990).
+
+__Unidad de medida:__ Índice.
+
+__Interpretación:__ En la gestión $t$, el volumen físico de producción industrial incrementó/disminuyó $(x-100)$\% más/menos que en la gestión de 1990.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Unidad de Análisis de Políticas Sociales y Económicas (UDAPE), Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Número de empresas {data-navmenu="Industria" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Número de empresas grandes y medianas__
+
+```{r}
+db1 <- db %>% filter(year == 2010 | year == 2012 | year == 2017)
+g1 <- ggplot(data = db1, aes(x = as.character(year), y = nro_empresas, text = paste("Año: ", year, "<br>Número: ", format(round(nro_empresas, 0), nsmall = 0), "empresas" ))) + 
+  geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") +
+  scale_x_discrete(limits = c("2010", "2012", "2017")) +  theme_gray() + 
+  labs(x = "Años", y = "Número de empresas")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Número de empresas grandes y medianas.
+
+__Definición:__ Se define como la cantidad de empresas grandes y medianas (cuyo personal ocupado es mayor o igual a 20 personas o los ingresos son mayores a tres millones de bolivianos) en el rubro de industria manufacturera.
+
+__Metodología de cálculo:__ 
+
+$$NEIM_t = \sum_{i=1} NEMG_{it}$$
+
+- $NEIM_t$: Número de empresas en el rubro de industria manufacturera en el periodo $t$.
+
+- $EMG_{it}$: Número de empresas medianas y grandes según la clasificación de actividades económicas de Bolivia (CAEB) $i$ en el periodo $t$.
+ 
+__Unidad de medida:__ Número absoluto.
+
+__Interpretación:__ En la gestión $t$, el número de empresas con personal ocupado mayor o igual a 20 personas ó ingresos mayores a tres millones de bolivianos es de $x$.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Producción de alimentos {data-navmenu="Industria" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Índice de producción de alimentos__
+
+```{r}
+db1 <- db %>% filter(year < 2017)
+g1 <- ggplot(data = db1, aes(x = year, y = ind_produccion, text = paste("Año: ", year, "<br>Valor: ", format(round(ind_produccion, 1), nsmall = 1) ))) + 
+  geom_bar(stat = "identity", position = position_dodge(), colour = "#00AFBB", fill = "#00AFBB") +
+  scale_x_discrete(limits = c(2000:2016)) +  theme_gray() + 
+  labs(x = "Años", y = "")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Índice de producción de alimentos.
+
+__Definición:__ El índice de producción de alimentos cubre los cultivos alimentarios que se consideran comestibles y que contienen nutrientes. Se excluyen el café y el té porque, aunque son comestibles, no tienen valor nutritivo.
+
+__Metodología de cálculo:__ No aplica.
+ 
+__Unidad de medida:__ Índice.
+
+__Interpretación:__ En la gestión $t$, se produjo $(x-100)$\% más/menos alimentos que en las gestiones 2004 - 2006 (gestiones base).
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+
+# Empleo en la industria {data-navmenu="Industria" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Empleados en la industria (% del empleo)__
+
+```{r}
+db1 <-  melt(db, id.vars = "year", measure.vars = c("emp_ind_h", "emp_ind_m"), variable.name = "sex", value.name = "industria")
+db1$sex <- if_else(db1$sex == "emp_ind_h", "Hombre", "Mujer")
+g1 <- ggplot(data = db1, aes(x = year, y = industria, group = sex, 
+                             color = sex, text = paste("Año: ", year, "<br>Valor: ", format(round(industria, 1), nsmall = 1), "%" ))) + 
+  geom_line() + geom_point() +
+  scale_x_discrete(limits = c(2000:2020)) +  theme_gray() + 
+  labs(x = "Años", y = "En porcentaje", color = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Sexo </b>')), xaxis = list(tickangle = 270))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Empleados en la industria (% del empleo).
+
+__Definición:__  El sector industrial se compone de minería y canteras, manufactura, construcción y servicios públicos (electricidad, gas y agua), de acuerdo con las divisiones 2-5 (CIIU 2) o categorías CF (CIIU 3) o categorías BF (CIIU 4).
+
+__Metodología de cálculo:__ 
+
+$$EI_t = \dfrac{NEI_t}{TE_t}*100$$
+ 
+- $EI_t$: Empleados en el sector industrial en el periodo $t$.
+
+- $NEI_t$: Número de empleados en el sector industrial en el periodo $t$.
+
+- $TE_t$: Número total de personas empleadas en todos los sectores en el periodo $t$.
+
+__Unidad de medida:__ Porcentaje.
+
+__Interpretación:__ En la gestión $t$, el $x$ e $y$\% de hombres y mujeres, respectivamente, se encuentran empleados en el sector industrial.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Banco Mundial (BM).
+
+__Referencia bibliográfica:__ Banco Mundial (BM).
+

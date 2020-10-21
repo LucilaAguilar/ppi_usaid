@@ -1,0 +1,273 @@
+---
+title: "VISUALIZACIÓN DE INDICADORES:"
+output: 
+  flexdashboard::flex_dashboard:
+    
+    navbar:
+    - { title: "Ir a #endemocracia", href: " http://endemocracia.bo/", align: left}  
+    - {icon: "fa-share-alt", href: "https://www.aru.org.bo/", align: right}  
+    - {icon: "fa-facebook", href: "https://www.facebook.com/EnDemocraciaBolivia", align: right}
+    - {icon: "fa-twitter", href: "https://twitter.com/arufoundation?lang=es", align: right}
+    - {icon: "fa-youtube", href: "https://www.youtube.com/user/ARUfoundation", align: right}
+    theme: readable
+    logo: logo_proy4.png
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r,echo=F,message=F,warning=T,results=F}
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+library(plotly)
+library(flexdashboard)
+library(knitr)
+library(reshape2)
+library(scales)
+library(stringr)
+library(tidyverse)
+
+# Base de datos
+
+load(url("https://github.com/LucilaAguilar/ppi_usaid/raw/main/_data/rnaturales.RData"))
+#setwd("D:\\ARU\\PPI USAID\\_out")
+#db <- as.data.frame(read_excel("data_rnaturales.xlsx", range = "A1:S11", sheet #= "Hoja1", col_names = T), stringsAsFactor = T)
+```
+
+# Hidrocarburos {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Producción de petróleo__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = prod_petroleo, text = paste("Año: ", year, "<br>Valor: ", format(round(prod_petroleo, 1), nsmall = 1), "MMBbls" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de barriles")
+ggplotly(g1, tooltip = "text")
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Producción de petróleo.
+
+__Definición:__ Total de producción petrolera nacional medida en millones de barriles en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de barriles.
+
+__Interpretación:__ En la gestión $t$, se produjeron $x$ millones de barriles de petróleo.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE) y Yacimientos Petrolíferos Fiscales Bolivianos (YPBF).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Gas Natural {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Producción de gas natural__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = prod_gas, text = paste("Año: ", year, "<br>Valor: ", format(round(prod_gas, 1), nsmall = 1), "MMMC" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") + 
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de metros cúbicos")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Producción de gas natural.
+
+__Definición:__ Volumen de producción de gas natural en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de metros cúbicos.
+
+__Interpretación:__ En la gestión $t$, se produjo $x$ millones de metros cúbicos de gas natural.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE) y Yacimientos Petrolíferos Fiscales Bolivianos (YPFB).
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE) .
+
+# Diésel {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Producción de diésel__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = diesel_oil, text = paste("Año: ", year, "<br>Valor: ", format(round(diesel_oil, 1), nsmall = 1), "MMBbls" ))) + 
+  geom_bar(stat = "identity", position = "dodge", colour = "#00AFBB", fill = "#00AFBB") + 
+  
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En millones de barriles")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Producción de diésel.
+
+__Definición:__ Volumen de producción de diésel en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Millones de barriles.
+
+__Interpretación:__ En la gestión $t$, se produjeron $x$ millones de barriles de diésel.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE) y Yacimientos Petrolíferos Fiscales Bolivianos (YPFB) Refinación.
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Oro {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Cotización oficial del precio del Oro__
+
+```{r}
+g1 <- ggplot(data = db, aes(x = year, y = cotiz_au, text = paste("Año: ", year, "<br>Precio: ", format(round(cotiz_au, 1), nsmall = 1), "$/onza troy" ))) + 
+  geom_line(aes(group = 1), colour = "#00AFBB") + geom_point(colour = "#00AFBB") + 
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En dólares estadounidenses por onza troy")
+ggplotly(g1, tooltip = "text") 
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Cotización oficial del precio del oro.
+
+__Definición:__ Cotización del precio del oro.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Dólares / onza troy.
+
+__Interpretación:__ En la gestión $t$, el precio por onza troy del oro es $x$ dólares estadounidenses.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Viceministerio de Política Minera, Regulación y Fiscalización. Viceministerio de Minería y Metalurgia - COMIBOL - Minería Mediana - FENCOMIN - Localidad de Vinto.
+
+
+# Producción de minerales {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Producción de minerales, según producto__
+
+```{r}
+db1 <-  melt(db, id.vars = "year", measure.vars = c("prod_sn", "prod_cu", "prod_pb", "prod_zn", "prod_w", "prod_ag", "prod_sb", "prod_au"), variable.name = "producto", value.name = "produccion")
+db1$producto <- if_else(db1$producto == "prod_sn", "Estaño", if_else(db1$producto == "prod_cu", "Cobre", if_else(db1$producto == "prod_pb", "Plomo", if_else(db1$producto == "prod_zn", "Zinc", if_else(db1$producto == "prod_w", "Wólfram", if_else(db1$producto == "prod_ag", "Plata", if_else(db1$producto == "prod_sb", "Antimonio", "Oro")))))))
+
+g1 <- ggplot(data = db1, aes(x = year, y = produccion, fill = producto, text = paste("Año: ", year, "<br>Producción: ", format(round(produccion, 1), nsmall = 1), "TMF" ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() + 
+  labs(x = "Años", y = "En toneladas métricas finas", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Producto </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Producción de minerales, según producto.
+
+__Definición:__ Volumen de producción según tipo de mineral.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Toneladas métricas finas.
+
+__Interpretación:__ En la gestión $t$, el volumen de producción de antimonio, cobre, estaño, oro, plata, plomo, wólfram y zinc alcanzó las $u$, $v$, $w$, $x$, $y$, $z$, $a$, $b$ toneladas métricas finas, respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Viceministerio de Minería y Metalurgia - COMIBOL - Minería Mediana - FENCOMIN - Localidad de Vinto.
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
+
+# Superficie para desmonte {data-navmenu="Recursos Naturales" data-icon="fa-list"}
+
+Column {data-width=600}
+-----------------------------------------------------------------------
+
+### __SERIE HISTÓRICA__ <br> __Superficie autorizada para desmonte, según tipo de usuario__
+
+```{r}
+db1 <-  melt(db, id.vars = "year", measure.vars = c("sup_des1", "sup_des2", "sup_des3", "sup_des4", "sup_des5", "sup_des6"), variable.name = "tipo", value.name = "superficie")
+db1$tipo <- if_else(db1$tipo == "sup_des1", "Agrupación social del lugar", if_else(db1$tipo == "sup_des2", "Comunidad campesina", if_else(db1$tipo == "sup_des3", "Comunidad Indígena o Pueblo Indígena en Tierras Comunitarias de Origen", if_else(db1$tipo == "sup_des4", "Concesión Forestal en Tierras Fiscales a empresas", if_else(db1$tipo == "sup_des5", "Propietario Privado", "No definido, con fines no agropecuarios")))))
+
+g1 <- ggplot(data = db1, aes(x = year, y = superficie, fill = str_wrap(tipo, 30), text = paste("Año: ", year, "<br>Superficie: ", format(round(superficie, 1), nsmall = 1), "ha" ))) + 
+  geom_bar(stat = "identity", position = "stack") + 
+  scale_y_continuous(labels = comma) +
+  scale_x_discrete(limits = c(2010:2019)) +  theme_gray() +
+  theme(legend.key.height = unit(1, "cm")) +
+  labs(x = "Años", y = "En hectáreas", fill = "")
+ggplotly(g1, tooltip = "text") %>% layout(legend=list(title=list(text='<b> Tipo de usuario </b>')))
+```
+ 
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### __FICHA TÉCNICA__
+
+__Nombre del indicador:__ Superficie autorizada para desmonte, según tipo de usuario.
+
+__Definición:__ Extensión de superficie autorizada para desmonte, según tipo de usuario en un determinado periodo.
+
+__Metodología de cálculo:__ No aplica.
+
+__Unidad de medida:__ Hectáreas.
+
+__Interpretación:__ En la gestión $t$, la superficie autorizada para desmonte es de $u$, $v$, $w$, $x$, $y$, $z$ hectáreas para Agrupación social del lugar, Comunidad Campesina, Comunidad Indígena o Pueblo Indígena en Tierras, Comunitarias de Origen, Concesión Forestal en Tierras Fiscales a empresas, Propietario Privado y No Definido (con fines no agropecuarios), respectivamente.
+
+__Nivel de desagregación:__ Nacional.
+
+__Periodicidad:__ Anual.
+
+__Fuente de datos:__ Instituto Nacional de Estadística (INE), Autoridad de Fiscalización y Control Social de Bosques y Tierra.
+
+__Referencia bibliográfica:__ Instituto Nacional de Estadística (INE).
